@@ -1,0 +1,555 @@
+### Get all users
+GET http://localhost:8080/api/users
+### Create User
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+    "name": "Kamal Perera",
+    "email": "kamal@gmail.com",
+    "password": "123456",
+    "university": "USJP",
+    "faculty": "Technology",
+    "batch": 2024
+}
+
+### Get user by ID
+GET http://localhost:8080/api/users/73
+
+### Update user
+PUT http://localhost:8080/api/users/73
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0dW5pcXVlMTIzNDVAZXhhbXBsZS5jb20iLCJpYXQiOjE3ODY2MDg3NzcsImV4cCI6MTc4NjY5NTE3N30.oWnxyt7Y0j-l1GftkHm5KXIWS-n2ghbX0HTI5QAGXDo
+Content-Type: application/json
+
+{
+    "name": "Updated User",
+    "email": "updated@gmail.com",
+    "password": "newpassword",
+    "university": "USJP",
+    "faculty": "Technology",
+    "batch": 2024
+}
+### Delete user
+DELETE http://localhost:8080/api/users/2
+
+### Test password hashing
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "name": "ruwan",
+  "email": "ruwan1@gmail.com",
+  "password": "125555s",
+  "university": "USJP",
+  "faculty": "Technology",
+  "batch": 2024
+}
+
+
+
+### Login
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ruwan1@gmail.com",
+  "password": "125555s"
+}
+
+###
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+    "name": "Kamal Silva",
+    "email": "kamal@example.com",
+    "password": "secret123",
+    "university": "USJP",
+    "faculty": "Technology",
+    "batch": 2024
+}
+
+### Register a new user
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+    "name": "Test User",
+    "email": "test999@example.com",
+    "password": "test123",
+    "university": "USJP",
+    "faculty": "Technology",
+    "batch": 2024
+}
+
+###
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+    "name": "Test User",
+    "email": "test@example.com",
+    "password": "test123",
+    ...
+}
+###
+GET http://localhost:8080/api/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJydXdhbjFAZ21haWwuY29tIiwiaWF0IjoxNzg2NTcwNDExLCJleHAiOjE3ODY2NTY4MTF9.esmIaX3JVN__YVmvnJKHx3ARHq85jQ_z1Uh0wEqFZ6k
+
+###
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+    "name": "Test User",
+    "email": "testunique1235@example.com",
+    "password": "test123",
+    "university": "USJP",
+    "faculty": "Technology",
+    "batch": 2024
+}
+###
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "testunique12345@example.com",
+    "password": "test123"
+}
+###
+GET http://localhost:8080/api/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0dW5pcXVlMTIzNDVAZXhhbXBsZS5jb20iLCJpYXQiOjE3ODY2MDg3NzcsImV4cCI6MTc4NjY5NTE3N30.oWnxyt7Y0j-l1GftkHm5KXIWS-n2ghbX0HTI5QAGXDo
+
+###
+GET http://localhost:8080/api/users
+
+### Create a new user
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+    "name": "Test Student",
+    "email": "teststudent@gmail.com",
+    "password": "password123",
+    "university": "USJP",
+    "faculty": "Technology",
+    "batch": 2024
+}
+
+### Login with the newly created student
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "isuru@gmail.com",
+    "password": "11223344"
+}
+###
+GET http://localhost:8080/api/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHVkZW50QGdtYWlsLmNvbSIsInJvbGUiOiJTVFVERU5UIiwiaWF0IjoxNzg2NjQ1NjA3LCJleHAiOjE3ODY3MzIwMDd9.5fxIz3327DmvwIj9sEYSSkv8GBdsSe9oFUNWSkCxorY
+Content-Type: application/json
+
+###
+PUT http://localhost:8080/api/users/80
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHVkZW50QGdtYWlsLmNvbSIsInJvbGUiOiJTVFVERU5UIiwiaWF0IjoxNzg2NjQ1NjA3LCJleHAiOjE3ODY3MzIwMDd9.5fxIz3327DmvwIj9sEYSSkv8GBdsSe9oFUNWSkCxorY
+Content-Type: application/json
+
+{
+    "name": "Updated Student rwan",
+    "email": "student@gmail.com",
+    "password": "password1213",
+    "university": "colombo university",
+    "faculty": "ART  ssss",
+    "batch": 2024
+}
+
+
+### Duplicate email test
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+    "name": "isuru",
+    "email": "isuru@gmail.com",
+    "password": "11223344",
+    "university": "USJP",
+    "faculty": "Technology",
+    "batch": 2024
+}
+
+
+
+### ADMIN LOGIN
+
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "admin@uniconnect.com",
+    "password": "admin123"
+}
+
+### ADMIN - GET ALL USERS
+
+GET http://localhost:8080/api/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkB1bmljb25uZWN0LmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc4NjY1NDc3NiwiZXhwIjoxNzg2NzQxMTc2fQ.CzRVjvwV9aWatzP0_cWW7fcggk27J5LcTkImqNGl6zo
+.
+
+
+### ADMIN - CREATE ANOTHER ADMIN
+POST http://localhost:8080/api/admin/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkB1bmljb25uZWN0LmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc4NjY1NDk3MywiZXhwIjoxNzg2NzQxMzczfQ.Y_UQoucivOgBqG3fH6VNjAtCF-XFQAcTOldIR0hxySY
+Content-Type: application/json
+
+{
+    "name": "tAdmin",
+    "email": "a@uniconnect.com",
+    "password": "admin123",
+    "university": "USJP",
+    "faculty": "Technology",
+    "batch": 2024
+}
+
+
+### STUDENT TRYING TO CREATE ADMIN
+
+POST http://localhost:8080/api/admin/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHVkZW50QGdtYWlsLmNvbSIsInJvbGUiOiJTVFVERU5UIiwiaWF0IjoxNzg2NjQ1NjA3LCJleHAiOjE3ODY3MzIwMDd9.5fxIz3327DmvwIj9sEYSSkv8GBdsSe9oFUNWSkCxorY
+Content-Type: application/json
+
+{
+    "name": "Fake Admin",
+    "email": "fakeadmin@uniconnect.com",
+    "password": "admin123",
+    "university": "USJP",
+    "faculty": "Technology",
+    "batch": 2024
+}
+####
+POST http://localhost:8080/api/posts
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaXl1cnVAZ21haWwuY29tIiwicm9sZSI6IlNUVURFTlQiLCJpYXQiOjE3ODY5OTA4MjgsImV4cCI6MTc4NzA3NzIyOH0.kPgcUm8hyl4UCqcfK3ySDldm8c_cNygdpRnvVO3uV0w
+Content-Type: application/json
+
+{
+    "title": "Exam Notice 02",
+    "content": "Final examination will start next week."
+}
+
+
+
+### CREATE POST
+POST http://localhost:8080/api/posts
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaXl1cnVAZ21haWwuY29tIiwicm9sZSI6IlNUVURFTlQiLCJpYXQiOjE3ODcwODM2MjAsImV4cCI6MTc4NzE3MDAyMH0.x_IpD899ks5ro9Xqb1BzLyikVMpNePcoEP5Udd4_Dlg
+
+Content-Type: application/json
+{
+    "title": "mama miyuru",
+    "content": " hellow"
+}
+
+###GET ALL POSTS
+GET http://localhost:8080/api/posts
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaXl1cnVAZ21haWwuY29tIiwicm9sZSI6IlNUVURFTlQiLCJpYXQiOjE3ODY5OTA4MjgsImV4cCI6MTc4NzA3NzIyOH0.kPgcUm8hyl4UCqcfK3ySDldm8c_cNygdpRnvVO3uV0w
+
+
+### GET POST BY ID
+GET http://localhost:8080/api/posts/11
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaXl1cnVAZ21haWwuY29tIiwicm9sZSI6IlNUVURFTlQiLCJpYXQiOjE3ODY5OTA4MjgsImV4cCI6MTc4NzA3NzIyOH0.kPgcUm8hyl4UCqcfK3ySDldm8c_cNygdpRnvVO3uV0w
+
+### DELETE OWN POST
+DELETE http://localhost:8080/api/posts/11
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaXl1cnVAZ21haWwuY29tIiwicm9sZSI6IlNUVURFTlQiLCJpYXQiOjE3ODY5OTA4MjgsImV4cCI6MTc4NzA3NzIyOH0.kPgcUm8hyl4UCqcfK3ySDldm8c_cNygdpRnvVO3uV0w
+
+
+
+
+
+### GET MY POSTS
+GET http://localhost:8080/api/posts/my
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaXl1cnVAZ21haWwuY29tIiwicm9sZSI6IlNUVURFTlQiLCJpYXQiOjE3ODY5OTA4MjgsImV4cCI6MTc4NzA3NzIyOH0.kPgcUm8hyl4UCqcfK3ySDldm8c_cNygdpRnvVO3uV0w
+
+### UPDATE MY POST
+
+PUT http://localhost:8080/api/posts/10
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaXl1cnVAZ21haWwuY29tIiwicm9sZSI6IlNUVURFTlQiLCJpYXQiOjE3ODY5OTA4MjgsImV4cCI6MTc4NzA3NzIyOH0.kPgcUm8hyl4UCqcfK3ySDldm8c_cNygdpRnvVO3uV0w
+Content-Type: application/json
+
+{
+    "title": "Updated Exam Notice miyuru",
+    "content": "Final examination will start on Monday."
+}
+
+
+### CREATE COMMENT
+
+POST http://localhost:8080/api/posts/12/comments
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJpc3VydUBnbWFpbC5jb20iLCJyb2xlIjoiU1RVREVOVCIsImlhdCI6MTc4NzA4NDA3MiwiZXhwIjoxNzg3MTcwNDcyfQ.W-BtEpv9XW9Ua3GoLB5nph9TCamrLLFQNVrdZOkRpRY
+Content-Type: application/json
+
+{
+    "content": "ado maruadsihuisdi bn!"
+}
+
+### GET COMMENTS OF POST
+
+GET http://localhost:8080/api/posts/2/comments
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJpc3VydUBnbWFpbC5jb20iLCJyb2xlIjoiU1RVREVOVCIsImlhdCI6MTc4Njk1NDMzMCwiZXhwIjoxNzg3MDQwNzMwfQ.lJjf0EcWpP67nDll23PZU-uhABz71dHXrwK9fNJYDXw
+
+### GET MY COMMENTS
+
+GET http://localhost:8080/api/comments/my
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaXl1cnVAZ21haWwuY29tIiwicm9sZSI6IlNUVURFTlQiLCJpYXQiOjE3ODY5OTA4MjgsImV4cCI6MTc4NzA3NzIyOH0.kPgcUm8hyl4UCqcfK3ySDldm8c_cNygdpRnvVO3uV0w
+
+### UPDATE COMMENT
+
+
+PUT http://localhost:8080/api/comments/10
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaXl1cnVAZ21haWwuY29tIiwicm9sZSI6IlNUVURFTlQiLCJpYXQiOjE3ODY5OTA4MjgsImV4cCI6MTc4NzA3NzIyOH0.kPgcUm8hyl4UCqcfK3ySDldm8c_cNygdpRnvVO3uV0w
+Content-Type: application/json
+
+{
+    "content": "Updated comment content"
+}
+
+###
+PUT http://localhost:8080/api/comments/7
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaXl1cnVAZ21haWwuY29tIiwicm9sZSI6IlNUVURFTlQiLCJpYXQiOjE3ODY5OTMxMDQsImV4cCI6MTc4NzA3OTUwNH0.q0rYlobWM3oDIueNoQ9wCZphjzhm2KLXUn802iZGgfs
+Content-Type: application/json
+
+{
+    "content": "Updated comment!"
+}
+
+
+### DELETE COMMENT
+
+DELETE http://localhost:8080/api/comments/7
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaXl1cnVAZ21haWwuY29tIiwicm9sZSI6IlNUVURFTlQiLCJpYXQiOjE3ODY5OTA4MjgsImV4cCI6MTc4NzA3NzIyOH0.kPgcUm8hyl4UCqcfK3ySDldm8c_cNygdpRnvVO3uV0w
+
+
+
+#### LOGIN AS STUDENT
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "stwudent@gmail.com",
+    "password": "11223344"
+}
+
+#### LIKE POST
+POST http://localhost:8080/api/posts/12/like
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJpc3VydUBnbWFpbC5jb20iLCJyb2xlIjoiU1RVREVOVCIsImlhdCI6MTc4NzA4NDA3MiwiZXhwIjoxNzg3MTcwNDcyfQ.W-BtEpv9XW9Ua3GoLB5nph9TCamrLLFQNVrdZOkRpRY
+
+
+###get like count
+GET http://localhost:8080/api/posts/10/likes/count
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHd1ZGVudEBnbWFpbC5jb20iLCJyb2xlIjoiU1RVREVOVCIsImlhdCI6MTc4Njk2MDU2MywiZXhwIjoxNzg3MDQ2OTYzfQ.av2qXYLFbGBnZyE8GuSGOYUUQVt-Wi048ixIW1ynAXw   
+
+###Current user liked ද බලන්න
+GET http://localhost:8080/api/posts/10/liked
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHd1ZGVudEBnbWFpbC5jb20iLCJyb2xlIjoiU1RVREVOVCIsImlhdCI6MTc4Njk2MDU2MywiZXhwIjoxNzg3MDQ2OTYzfQ.av2qXYLFbGBnZyE8GuSGOYUUQVt-Wi048ixIW1ynAXw
+
+###unlike post
+DELETE http://localhost:8080/api/posts/10/like
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaXl1cnVAZ21haWwuY29tIiwicm9sZSI6IlNUVURFTlQiLCJpYXQiOjE3ODY5OTA4MjgsImV4cCI6MTc4NzA3NzIyOH0.kPgcUm8hyl4UCqcfK3ySDldm8c_cNygdpRnvVO3uV0w
+
+###
+GET http://localhost:8080/api/posts
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHd1ZGVudEBnbWFpbC5jb20iLCJyb2xlIjoiU1RVREVOVCIsImlhdCI6MTc4Njk2MDU2MywiZXhwIjoxNzg3MDQ2OTYzfQ.av2qXYLFbGBnZyE8GuSGOYUUQVt-Wi048ixIW1ynAXw
+
+
+### delete post
+DELETE http://localhost:8080/api/posts/10
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaXl1cnVAZ21haWwuY29tIiwicm9sZSI6IlNUVURFTlQiLCJpYXQiOjE3ODY5OTA4MjgsImV4cCI6MTc4NzA3NzIyOH0.kPgcUm8hyl4UCqcfK3ySDldm8c_cNygdpRnvVO3uV0w
+
+
+
+### Create a new user
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+    "name": "miyuru",
+    "email": "miyuru@gmail.com",
+    "password": "123456",
+    "university": "USJP",
+    "faculty": "Technology",
+    "batch": 2024
+}
+
+### login
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "miyuru@gmail.com",
+    "password": "123456"
+}
+
+### login
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "isuru@gmail.com",
+    "password": "000000"
+}
+
+### student A post create
+POST http://localhost:8080/api/posts
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaXl1cnVAZ21haWwuY29tIiwicm9sZSI6IlNUVURFTlQiLCJpYXQiOjE3ODcwODQwNTEsImV4cCI6MTc4NzE3MDQ1MX0.Zt1GQKYAL-J3XxGfBbAEToMbi9cklkqRMLLe5P0SYQg
+Content-Type: application/json
+
+{
+    "title": "Notification Test Post",
+    "content": "This post is created to test likes and comments notifications."
+}
+
+###
+GET http://localhost:8080/api/posts
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaXl1cnVAZ21haWwuY29tIiwicm9sZSI6IlNUVURFTlQiLCJpYXQiOjE3ODcwODQwNTEsImV4cCI6MTc4NzE3MDQ1MX0.Zt1GQKYAL-J3XxGfBbAEToMbi9cklkqRMLLe5P0SYQg
+
+### see notification
+GET http://localhost:8080/api/notifications
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaXl1cnVAZ21haWwuY29tIiwicm9sZSI6IlNUVURFTlQiLCJpYXQiOjE3ODcwODQwNTEsImV4cCI6MTc4NzE3MDQ1MX0.Zt1GQKYAL-J3XxGfBbAEToMbi9cklkqRMLLe5P0SYQg
+
+### get unread notification count
+GET http://localhost:8080/api/notifications/unread/count
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaXl1cnVAZ21haWwuY29tIiwicm9sZSI6IlNUVURFTlQiLCJpYXQiOjE3ODcwODQwNTEsImV4cCI6MTc4NzE3MDQ1MX0.Zt1GQKYAL-J3XxGfBbAEToMbi9cklkqRMLLe5P0SYQg
+
+#### mark notification as read
+PUT http://localhost:8080/api/notifications/2/read
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaXl1cnVAZ21haWwuY29tIiwicm9sZSI6IlNUVURFTlQiLCJpYXQiOjE3ODcwODQwNTEsImV4cCI6MTc4NzE3MDQ1MX0.Zt1GQKYAL-J3XxGfBbAEToMbi9cklkqRMLLe5P0SYQg
+
+#### get user profile
+
+GET http://localhost:8080/api/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJpc3VydUBnbWFpbC5jb20iLCJyb2xlIjoiU1RVREVOVCIsImlhdCI6MTc4NzIzMjM1OSwiZXhwIjoxNzg3MzE4NzU5fQ.09znjhk420De6gVk5YXhjJHwf2wlmcpHhe6qzFKUD4c
+
+
+
+#### update user profile
+PUT http://localhost:8080/api/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJpc3VydUBnbWFpbC5jb20iLCJyb2xlIjoiU1RVREVOVCIsImlhdCI6MTc4NzIzMjM1OSwiZXhwIjoxNzg3MzE4NzU5fQ.09znjhk420De6gVk5YXhjJHwf2wlmcpHhe6qzFKUD4c
+Content-Type: application/json
+
+{
+    "name": "Miyuru Updated",
+    "university": "USJP",
+    "faculty": "Technology",
+    "batch": 2024
+}
+
+
+#### change password
+PUT http://localhost:8080/api/profile/change-password
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJpc3VydUBnbWFpbC5jb20iLCJyb2xlIjoiU1RVREVOVCIsImlhdCI6MTc4NzIzMjM1OSwiZXhwIjoxNzg3MzE4NzU5fQ.09znjhk420De6gVk5YXhjJHwf2wlmcpHhe6qzFKUD4c
+Content-Type: application/json
+
+{
+    "currentPassword": "11223344",
+    "newPassword": "000000"
+}
+
+#### search users
+GET http://localhost:8080/api/users/search?q=isuru@gmail.com
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJpc3VydUBnbWFpbC5jb20iLCJyb2xlIjoiU1RVREVOVCIsImlhdCI6MTc4NzIzNTcyNSwiZXhwIjoxNzg3MzIyMTI1fQ.U5oCc0JgeYqe2N7z6uUQ7z7dTEL31KgmrkYh0QQANKo
+
+
+#### get public user by ID
+GET http://localhost:8080/api/users/public/90
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJpc3VydUBnbWFpbC5jb20iLCJyb2xlIjoiU1RVREVOVCIsImlhdCI6MTc4NzMwMDkwMSwiZXhwIjoxNzg3Mzg3MzAxfQ.xRi9D5EoRkIV0SDnARAvYV5mvSIKVa5fpD8bxSBrBC8
+
+
+
+#### send connection request
+POST http://localhost:8080/api/connections/send/90
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJpc3VydUBnbWFpbC5jb20iLCJyb2xlIjoiU1RVREVOVCIsImlhdCI6MTc4NzQyNDM5OSwiZXhwIjoxNzg3NTEwNzk5fQ.Reixj2LJC9_-2o_I2X077sv4dABakFRCezbygQaNevQ
+
+#### get received connection requests
+GET http://localhost:8080/api/connections/received
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaXl1cnVAZ21haWwuY29tIiwicm9sZSI6IlNUVURFTlQiLCJpYXQiOjE3ODczMDE4OTUsImV4cCI6MTc4NzM4ODI5NX0.y9mcclwFmEiYj4dALyuMiNCOcHejUMiawGoOQEoswiE
+
+#### accept connection request
+PUT http://localhost:8080/api/connections/1/accept
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaXl1cnVAZ21haWwuY29tIiwicm9sZSI6IlNUVURFTlQiLCJpYXQiOjE3ODczMDE4OTUsImV4cCI6MTc4NzM4ODI5NX0.y9mcclwFmEiYj4dALyuMiNCOcHejUMiawGoOQEoswiE
+
+#### get sent connection requests
+GET http://localhost:8080/api/connections/sent
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJpc3VydUBnbWFpbC5jb20iLCJyb2xlIjoiU1RVREVOVCIsImlhdCI6MTc4NzMwMTk2OCwiZXhwIjoxNzg3Mzg4MzY4fQ.4zPmkhmKIqsv0slwl5Ps1fwocPZIg3CBq6poSIeEo1Q
+
+#### get connection status
+GET http://localhost:8080/api/connections/status/90
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJpc3VydUBnbWFpbC5jb20iLCJyb2xlIjoiU1RVREVOVCIsImlhdCI6MTc4NzQyNDM5OSwiZXhwIjoxNzg3NTEwNzk5fQ.Reixj2LJC9_-2o_I2X077sv4dABakFRCezbygQaNevQ
+
+
+#### cancel connection request
+DELETE http://localhost:8080/api/connections/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJpc3VydUBnbWFpbC5jb20iLCJyb2xlIjoiU1RVREVOVCIsImlhdCI6MTc4NzQyNDM5OSwiZXhwIjoxNzg3NTEwNzk5fQ.Reixj2LJC9_-2o_I2X077sv4dABakFRCezbygQaNevQ
+
+#### cancel connection request
+DELETE http://localhost:8080/api/connections/2/cancel
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJpc3VydUBnbWFpbC5jb20iLCJyb2xlIjoiU1RVREVOVCIsImlhdCI6MTc4NzQyNDM5OSwiZXhwIjoxNzg3NTEwNzk5fQ.Reixj2LJC9_-2o_I2X077sv4dABakFRCezbygQaNevQ
+
+
+#### send message
+POST http://localhost:8080/api/messages/send/89
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaXl1cnVAZ21haWwuY29tIiwicm9sZSI6IlNUVURFTlQiLCJpYXQiOjE3ODc1MDYyMzAsImV4cCI6MTc4NzU5MjYzMH0.tcuUSJl39tajrP1mIz4MPhYVmqCYrNezsaoo5W22SWg
+Content-Type: application/json
+
+{
+  "content": "Hello B, how are you?"
+}
+
+
+#### get conversation messages
+GET http://localhost:8080/api/messages/conversation/89
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaXl1cnVAZ21haWwuY29tIiwicm9sZSI6IlNUVURFTlQiLCJpYXQiOjE3ODc1MDYyMzAsImV4cCI6MTc4NzU5MjYzMH0.tcuUSJl39tajrP1mIz4MPhYVmqCYrNezsaoo5W22SWg
+
+
+#### get received messages
+GET http://localhost:8080/api/messages/received
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJpc3VydUBnbWFpbC5jb20iLCJyb2xlIjoiU1RVREVOVCIsImlhdCI6MTc4NzUwNjg0NywiZXhwIjoxNzg3NTkzMjQ3fQ.uO3T14LGtShpLyQ_wZuXddyGuTHbw7GzXigRvuxYmDM
+
+#### get sent messages
+PATCH http://localhost:8080/api/messages/1/read
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJpc3VydUBnbWFpbC5jb20iLCJyb2xlIjoiU1RVREVOVCIsImlhdCI6MTc4NzUwNjg0NywiZXhwIjoxNzg3NTkzMjQ3fQ.uO3T14LGtShpLyQ_wZuXddyGuTHbw7GzXigRvuxYmDM
+
+###
+GET http://localhost:8080/api/messages/unread-count
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJpc3VydUBnbWFpbC5jb20iLCJyb2xlIjoiU1RVREVOVCIsImlhdCI6MTc4NzUwNjg0NywiZXhwIjoxNzg3NTkzMjQ3fQ.uO3T14LGtShpLyQ_wZuXddyGuTHbw7GzXigRvuxYmDM
+
+#### delete message
+DELETE http://localhost:8080/api/messages/3
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaXl1cnVAZ21haWwuY…Y0N30.FlM-TMZvDHdlwxO8CBb3L_LSDfohuuFYSQkic9ysoAM
+
+
+###
+GET http://localhost:8080/api/users/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaXl1cnVAZ21haWwuY29tIiwicm9sZSI6IlNUVURFTlQiLCJpYXQiOjE3ODc1ODIyOTEsImV4cCI6MTc4NzY2ODY5MX0.leyyMaP6DL-lDu-3PD7A2RdkNZ1ZXzTFutvOjpbKMKE
+
+###
+post http://localhost:8080/api/auth/register/student
+Content-Type: application/json
+
+{
+    "name": "K",
+    "email": "k@gmail.com",
+    "password": "123456",
+    "university": "USJP",
+    "faculty": "Technology",
+    "batch": 2024
+}
+###
+post http://localhost:8080/api/admin/users
+Content-Type: application/json
+
+{
+  "name": "Admin User",
+  "email": "a@gmail.com",
+  "password": "zzzzzz",
+  "university": "University of Sri Jayewardenepura",
+  "faculty": "Faculty of Technology",
+  "batch": 1
+}
