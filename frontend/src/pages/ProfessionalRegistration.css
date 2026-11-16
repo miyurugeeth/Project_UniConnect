@@ -1,0 +1,20 @@
+.professional-registration .registration-card {
+  width: min(100%, 560px);
+}
+
+.professional-registration .registration-grid {
+  gap: 17px 14px;
+}
+
+.professional-registration .registration-success__icon {
+  background: #f0e5c9;
+}
+
+.professional-registration .registration-submit {
+  margin-top: 0;
+}
+
+.professional-register-prompt {
+  margin-top: 12px;
+  text-align: center;
+}
