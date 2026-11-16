@@ -1,0 +1,52 @@
+:root {
+  font-family: Inter, "Segoe UI", sans-serif;
+  color: #17243a;
+  background: #f8f6f0;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  font-optical-sizing: auto;
+  font-weight: 400;
+
+  --navy: #17365d;
+  --navy-dark: #102a46;
+  --gold: #c99a3a;
+  --cream: #f8f6f0;
+  --white: #ffffff;
+  --muted: #6d7888;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button,
+a,
+input {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 3px solid rgba(201, 154, 58, 0.65);
+  outline-offset: 3px;
+}
+
+::selection {
+  color: var(--navy-dark);
+  background: rgba(201, 154, 58, 0.3);
+}
