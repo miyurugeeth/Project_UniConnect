@@ -1,55 +1,105 @@
-# UniConnect Backend
+# UniConnect
 
-Initial Spring Boot foundation for the UniConnect team project.
+UniConnect is a Spring Boot and React application for university students. The social networking module supports student profiles and search, category-aware posts and feed filtering, media attachments, likes, and comments.
 
 ## Requirements
 
 - JDK 25
-- Microsoft SQL Server with TCP/IP enabled
+- Node.js and npm
+- Microsoft SQL Server
 
-## Local SQL Server configuration
+## Configuration
 
-The application connects to the existing `UniConnect` database at `localhost:1433` using SQL Server Authentication. Create or use a dedicated SQL Server login that has access to this database; do not use an administrator login for the application. Set `DB_URL`, `DB_USERNAME`, and `DB_PASSWORD` in the same terminal session used to launch Spring Boot. `.env.example` documents the expected values, but Spring Boot does not load that file automatically.
+Spring Boot does not load `.env` files automatically. Supply the following environment variables through your local development environment or deployment secret manager; never commit or print credential values:
 
-For local development in PowerShell, set the connection URL and SQL Server login, then enter the password securely:
+| Variable | Purpose |
+| --- | --- |
+| `DB_URL` | SQL Server JDBC URL; local default targets `UniConnect_Test` |
+| `DB_USERNAME` | SQL Server application login |
+| `DB_PASSWORD` | SQL Server application password |
+| `JWT_SECRET_BASE64` | Base64-encoded JWT signing key |
+| `JWT_ACCESS_TOKEN_TTL_SECONDS` | Access-token lifetime |
+| `JWT_ISSUER` | JWT issuer |
+| `FRONTEND_ORIGIN` | Allowed frontend origin |
+| `SOCIAL_MEDIA_PROVIDER` | Media storage provider; currently `local` |
+| `SOCIAL_MEDIA_STORAGE_DIR` | Private local media directory |
+
+Use a dedicated least-privilege database login. For production SQL Server connections, use a trusted certificate and disable `trustServerCertificate`. The local JDBC default is for development only.
+
+## Social networking
+
+- Student profile viewing and student search.
+- Student follow/unfollow, follower and following lists, with self-follow prevention and a database uniqueness constraint.
+- Authenticated post creation, editing, and deletion, with category selection and latest-first paginated feed.
+- API-provided category labels and category filtering.
+- Multiple private photo attachments and one video per post; previews and attachment retention/removal are supported during editing.
+- Like/unlike controls with a unique database constraint and per-student liked state.
+- Paginated comments with author information and owner-only edit/delete operations.
+
+Student identity for protected post, like, and comment actions comes from the authenticated JWT, not a client-supplied student ID.
+
+## Media storage and limits
+
+The local provider stores files outside the public web root, by default at `${user.home}/.uniconnect/social-media`. Override this with `SOCIAL_MEDIA_STORAGE_DIR`. The `SocialMediaStorageService` abstraction allows a future cloud provider; local storage is the provider currently implemented.
+
+Development defaults:
+
+- Up to 5 attachments per post, including no more than 1 video.
+- JPEG, PNG, or GIF images up to 10 MiB each.
+- MP4 or WebM videos up to 100 MiB each.
+- Total multipart request limit: 150 MiB.
+- Image dimensions and pixel count are bounded by backend configuration.
+
+The backend validates content signatures and image dimensions, generates storage keys, and stores only attachment metadata in SQL Server. Client filenames and MIME declarations are not used as storage identities.
+
+## Database migrations
+
+Flyway applies versioned migrations from `src/main/resources/db/migration` during normal application startup. The social schema migrations are:
+
+- V3: post categories, category assignment/backfill, category foreign key, and feed index.
+- V4: post attachment metadata.
+- V5: likes and the unique post/student constraint.
+- V6: comments and post/comment indexes.
+- V7: student follow relationships, self-follow check, uniqueness, and follower/following indexes.
+
+**Before starting the backend against a database that needs these migrations:**
+
+1. Verify the selected database is `UniConnect_Test` (or the explicitly intended target).
+2. Verify V1 and V2 history and V2 checksum compatibility; confirm the expected pending migration versions.
+3. Review V3–V7 and create/verify a restorable database backup.
+4. Obtain approval for the database-changing startup. Flyway will run through the normal application startup; do not execute migration SQL manually in SSMS.
+
+Do not modify V1 or V2 to resolve checksum or schema issues. Stop and investigate any unexpected migration history or validation error before proceeding.
+
+## Start the application
+
+First configure the environment variables above in the same terminal/session. Then, from the repository root:
 
 ```powershell
-$env:DB_URL = 'jdbc:sqlserver://localhost:1433;databaseName=UniConnect;encrypt=true;trustServerCertificate=true'
-$env:DB_USERNAME = 'your_sql_server_login'
-$securePassword = Read-Host 'Enter the SQL Server login password' -AsSecureString
-$env:DB_PASSWORD = (New-Object System.Net.NetworkCredential('', $securePassword)).Password
+.\mvnw.cmd spring-boot:run
 ```
 
-`trustServerCertificate=true` is intended only for local development with a self-signed certificate. For production, use a trusted SQL Server certificate and set `trustServerCertificate=false`.
-
-## Local JWT configuration
-
-The JWT signing key must be generated locally. The following PowerShell commands create a Base64-encoded key from 32 cryptographically random bytes and set the three JWT variables for the current terminal session:
+In another terminal:
 
 ```powershell
-$randomBytes = New-Object byte[] 32
-$rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
-$rng.GetBytes($randomBytes)
-$env:JWT_SECRET_BASE64 = [Convert]::ToBase64String($randomBytes)
-$rng.Dispose()
-$env:JWT_ACCESS_TOKEN_TTL_SECONDS = '900'
-$env:JWT_ISSUER = 'uniconnect-api'
+Set-Location frontend
+npm ci
+npm run dev
 ```
 
-Keep the generated key out of source control, logs, screenshots, and shared files. The JWT configuration planned for the next implementation step will require at least 32 random bytes after Base64 decoding. The expiration is in seconds; `900` is 15 minutes.
+The frontend uses the shared Axios API client and defaults to `http://localhost:8080`; set `VITE_API_BASE_URL` when the backend uses another base URL.
 
-`.env.example` documents the expected JWT variable names and values, but Spring Boot does not automatically load `.env` or `.env.example`. Set these variables in the same PowerShell session used to launch the application. The current configuration has an empty fallback for the secret so the application can start before JWT key configuration is implemented; token signing and validation are not configured yet.
+## Tests and checks
 
-Because the Spring Security starter is being added before the custom security filter chain, Spring Boot's default web security behavior applies temporarily when the application is run. The next implementation step will replace it with the intended stateless Bearer-token configuration.
-
-Flyway uses the SQL Server database module and applies versioned migrations from `src/main/resources/db/migration`. Hibernate schema generation is set to `validate` so it will not silently create or alter tables.
-
-## Build
-
-From the project root, run:
+From the repository root:
 
 ```powershell
 .\mvnw.cmd test
+Set-Location frontend
+npm ci
+npm test
+npm run lint
+npm run build
 ```
 
-The user and profile schema will be introduced through versioned Flyway migrations in a later implementation step.
+The focused social backend tests are `StudentSocialControllerTest`, `StudentSocialServiceTest`, and `LocalSocialMediaStorageServiceTest`. Frontend component tests are run with Vitest.

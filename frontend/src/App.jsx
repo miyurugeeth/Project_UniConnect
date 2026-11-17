@@ -7,6 +7,8 @@ import ProfessionalDashboard from './pages/ProfessionalDashboard'
 import RoleDashboard from './pages/RoleDashboard'
 import StudentRegistration from './pages/StudentRegistration'
 import StudentDashboard from './pages/StudentDashboard'
+import StudentSocialFeed from './pages/StudentSocialFeed'
+import StudentProfile from './pages/StudentProfile'
 
 const dashboardPaths = {
   STUDENT: '/student/dashboard',
@@ -67,6 +69,22 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['STUDENT']}>
               <StudentDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/student/feed"
+          element={
+            <ProtectedRoute allowedRoles={['STUDENT']}>
+              <StudentSocialFeed />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/student/profiles/:studentId"
+          element={
+            <ProtectedRoute allowedRoles={['STUDENT']}>
+              <StudentProfile />
             </ProtectedRoute>
           }
         />

@@ -11,7 +11,7 @@ import {
   RefreshCw,
   UserRound,
 } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/useAuth'
 import { api } from '../services/api'
 import PasswordChangeForm from './PasswordChangeForm'
@@ -106,6 +106,9 @@ function StudentDashboard() {
           </span>
         </a>
         <div className="dashboard-header__actions">
+          <Link className="dashboard-edit-button" to="/student/feed">
+            Student feed
+          </Link>
           <span className="dashboard-role">Student space</span>
           <button className="dashboard-logout" type="button" onClick={handleLogout}>
             <LogOut size={16} aria-hidden="true" />
