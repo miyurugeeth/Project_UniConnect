@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
@@ -88,6 +89,15 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiErrorResponse> handleUnreadableRequest(
             HttpServletRequest request) {
         return response(HttpStatus.BAD_REQUEST, "Request body is invalid.", request);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiErrorResponse> handleMaxUploadSizeExceeded(
+            HttpServletRequest request) {
+        return response(
+                HttpStatus.PAYLOAD_TOO_LARGE,
+                "Attachment exceeds the configured request size limit.",
+                request);
     }
 
     @ExceptionHandler(AccessDeniedException.class)

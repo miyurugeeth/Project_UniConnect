@@ -10,10 +10,14 @@ import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import java.sql.SQLException;
 import java.util.Set;
+import org.hibernate.TransientObjectException;
+import org.hibernate.TransientPropertyValueException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.web.servlet.MockMvc;
@@ -21,6 +25,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -131,7 +136,34 @@ class GlobalExceptionHandlerTest {
                 .andExpect(jsonPath("$.error").value("Internal Server Error"))
                 .andExpect(jsonPath("$.message").value("An unexpected error occurred."))
                 .andExpect(jsonPath("$.message", org.hamcrest.Matchers.not(containsString("SQL"))))
+                .andExpect(jsonPath("$.message", org.hamcrest.Matchers.not(containsString("secret"))))
                 .andExpect(jsonPath("$.path").value("/errors/unexpected"));
+    }
+
+    @Test
+    void returnsGenericErrorForHibernateTransientFailures()
+            throws Exception {
+        mockMvc.perform(get("/errors/transient-object/foreign-keys"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.message").value("An unexpected error occurred."));
+        mockMvc.perform(get("/errors/transient-object/cascade"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.message").value("An unexpected error occurred."));
+        mockMvc.perform(get("/errors/transient-object/lock"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.message").value("An unexpected error occurred."));
+        mockMvc.perform(get("/errors/transient-object/property"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.message").value("An unexpected error occurred."));
+        mockMvc.perform(get("/errors/transient-object/action-queue"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.message").value("An unexpected error occurred."));
+        mockMvc.perform(get("/errors/transient-object/unrecognized"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.message").value("An unexpected error occurred."));
+        mockMvc.perform(get("/errors/transient-object/invalid-type"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.message").value("An unexpected error occurred."));
     }
 
     private void assertError(String path, HttpStatus expectedStatus, String expectedMessage)
@@ -196,7 +228,42 @@ class GlobalExceptionHandlerTest {
 
         @GetMapping("/errors/unexpected")
         String unexpected() {
-            throw new IllegalStateException("SQL query and secret data");
+            throw new IllegalStateException(
+                    "SQL query and secret data",
+                    new InvalidDataAccessApiUsageException(
+                            "sensitive exception reason",
+                            new SQLException("sensitive comment text", "42S22", 207)));
+        }
+
+        @GetMapping("/errors/transient-object/{format}")
+        String transientObject(@PathVariable String format) {
+            TransientObjectException cause =
+                    switch (format) {
+                        case "foreign-keys" ->
+                                new TransientObjectException(
+                                        "object references an unsaved transient instance - save the transient instance before flushing: com.uniconnect.entity.StudentPost");
+                        case "cascade" ->
+                                new TransientObjectException(
+                                        "persistent instance references an unsaved transient instance of 'com.uniconnect.entity.StudentPost' (save the transient instance before flushing)");
+                        case "lock" ->
+                                new TransientObjectException(
+                                        "cannot lock an unsaved transient instance: com.uniconnect.entity.StudentPost");
+                        case "property" ->
+                                new TransientPropertyValueException(
+                                        "sensitive transient exception detail",
+                                        "com.uniconnect.entity.StudentPost",
+                                        "owner-only-class",
+                                        "post-property");
+                        case "action-queue" ->
+                                new TransientObjectException(
+                                        "Persistent instance of 'owner-only-class' with id 'private-id' references an unsaved transient instance via attribute 'post-property' (save the transient instance before flushing)");
+                        case "invalid-type" ->
+                                new TransientObjectException(
+                                        "object references an unsaved transient instance - save the transient instance before flushing: com.uniconnect.entity.StudentPost private-id");
+                        default ->
+                                new TransientObjectException("sensitive transient exception detail");
+                    };
+            throw new IllegalStateException("sensitive transient exception detail", cause);
         }
 
         @PostMapping("/errors/validated")
