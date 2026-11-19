@@ -1,6 +1,8 @@
-import { GraduationCap, LogOut, Sparkles } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { GraduationCap, LogOut, MessageSquareText, Sparkles } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/useAuth'
+import ThemeToggle from '../components/ThemeToggle'
+import NotificationBell from '../components/NotificationBell'
 import './Dashboard.css'
 
 function RoleDashboard({ role }) {
@@ -25,9 +27,15 @@ function RoleDashboard({ role }) {
           </span>
         </a>
         <div className="dashboard-header__actions">
+          <Link className="dashboard-logout" to="/messages" aria-label="Messages">
+            <MessageSquareText size={16} aria-hidden="true" />
+            <span>Messages</span>
+          </Link>
           <span className="dashboard-role">
             {isProfessional ? 'Professional space' : 'Admin space'}
           </span>
+          <ThemeToggle />
+          <NotificationBell />
           <button className="dashboard-logout" type="button" onClick={handleLogout}>
             <LogOut size={16} aria-hidden="true" />
             <span>Log out</span>

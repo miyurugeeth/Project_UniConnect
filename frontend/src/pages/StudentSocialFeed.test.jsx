@@ -3,6 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { api } from '../services/api'
+import { ThemeProvider } from '../context/ThemeContext.jsx'
+import { NotificationProvider } from '../context/NotificationContext.jsx'
 import StudentSocialFeed from './StudentSocialFeed'
 
 vi.mock('../services/api', () => ({
@@ -137,7 +139,11 @@ describe('StudentSocialFeed', () => {
   it('shows the latest feed content and only offers owner actions', async () => {
     render(
       <MemoryRouter>
-        <StudentSocialFeed />
+        <ThemeProvider>
+          <NotificationProvider>
+          <StudentSocialFeed />
+          </NotificationProvider>
+        </ThemeProvider>
       </MemoryRouter>,
     )
 
@@ -152,7 +158,11 @@ describe('StudentSocialFeed', () => {
   it('loads category choices and offers an all-categories filter', async () => {
     render(
       <MemoryRouter>
-        <StudentSocialFeed />
+        <ThemeProvider>
+          <NotificationProvider>
+          <StudentSocialFeed />
+          </NotificationProvider>
+        </ThemeProvider>
       </MemoryRouter>,
     )
 
@@ -175,7 +185,11 @@ describe('StudentSocialFeed', () => {
   it('creates a multipart post without sending any client-supplied owner ID', async () => {
     render(
       <MemoryRouter>
-        <StudentSocialFeed />
+        <ThemeProvider>
+          <NotificationProvider>
+          <StudentSocialFeed />
+          </NotificationProvider>
+        </ThemeProvider>
       </MemoryRouter>,
     )
 
@@ -211,7 +225,11 @@ describe('StudentSocialFeed', () => {
   it('edits an owned post through its post-specific endpoint', async () => {
     render(
       <MemoryRouter>
-        <StudentSocialFeed />
+        <ThemeProvider>
+          <NotificationProvider>
+          <StudentSocialFeed />
+          </NotificationProvider>
+        </ThemeProvider>
       </MemoryRouter>,
     )
 
@@ -263,7 +281,11 @@ describe('StudentSocialFeed', () => {
 
     render(
       <MemoryRouter>
-        <StudentSocialFeed />
+        <ThemeProvider>
+          <NotificationProvider>
+          <StudentSocialFeed />
+          </NotificationProvider>
+        </ThemeProvider>
       </MemoryRouter>,
     )
 
@@ -290,7 +312,11 @@ describe('StudentSocialFeed', () => {
 
     render(
       <MemoryRouter>
-        <StudentSocialFeed />
+        <ThemeProvider>
+          <NotificationProvider>
+          <StudentSocialFeed />
+          </NotificationProvider>
+        </ThemeProvider>
       </MemoryRouter>,
     )
 
@@ -308,7 +334,11 @@ describe('StudentSocialFeed', () => {
   it('closes the editor after deleting the post being edited', async () => {
     render(
       <MemoryRouter>
-        <StudentSocialFeed />
+        <ThemeProvider>
+          <NotificationProvider>
+          <StudentSocialFeed />
+          </NotificationProvider>
+        </ThemeProvider>
       </MemoryRouter>,
     )
 
@@ -348,7 +378,11 @@ describe('StudentSocialFeed', () => {
 
     render(
       <MemoryRouter>
-        <StudentSocialFeed />
+        <ThemeProvider>
+          <NotificationProvider>
+          <StudentSocialFeed />
+          </NotificationProvider>
+        </ThemeProvider>
       </MemoryRouter>,
     )
 
@@ -377,7 +411,11 @@ describe('StudentSocialFeed', () => {
 
     render(
       <MemoryRouter>
-        <StudentSocialFeed />
+        <ThemeProvider>
+          <NotificationProvider>
+          <StudentSocialFeed />
+          </NotificationProvider>
+        </ThemeProvider>
       </MemoryRouter>,
     )
 
@@ -396,7 +434,11 @@ describe('StudentSocialFeed', () => {
 
     render(
       <MemoryRouter>
-        <StudentSocialFeed />
+        <ThemeProvider>
+          <NotificationProvider>
+          <StudentSocialFeed />
+          </NotificationProvider>
+        </ThemeProvider>
       </MemoryRouter>,
     )
 
@@ -427,7 +469,11 @@ describe('StudentSocialFeed', () => {
 
     render(
       <MemoryRouter>
-        <StudentSocialFeed />
+        <ThemeProvider>
+          <NotificationProvider>
+          <StudentSocialFeed />
+          </NotificationProvider>
+        </ThemeProvider>
       </MemoryRouter>,
     )
 
@@ -439,7 +485,11 @@ describe('StudentSocialFeed', () => {
   it('submits student search and links results to student profiles', async () => {
     render(
       <MemoryRouter>
-        <StudentSocialFeed />
+        <ThemeProvider>
+          <NotificationProvider>
+          <StudentSocialFeed />
+          </NotificationProvider>
+        </ThemeProvider>
       </MemoryRouter>,
     )
 
@@ -459,7 +509,11 @@ describe('StudentSocialFeed', () => {
   it('loads the next feed page on demand', async () => {
     render(
       <MemoryRouter>
-        <StudentSocialFeed />
+        <ThemeProvider>
+          <NotificationProvider>
+          <StudentSocialFeed />
+          </NotificationProvider>
+        </ThemeProvider>
       </MemoryRouter>,
     )
 
@@ -477,7 +531,11 @@ describe('StudentSocialFeed', () => {
   it('filters the feed by category while preserving the paginated endpoint', async () => {
     render(
       <MemoryRouter>
-        <StudentSocialFeed />
+        <ThemeProvider>
+          <NotificationProvider>
+          <StudentSocialFeed />
+          </NotificationProvider>
+        </ThemeProvider>
       </MemoryRouter>,
     )
 
@@ -501,7 +559,11 @@ describe('StudentSocialFeed', () => {
   it('previews and removes a selected photo before publishing', async () => {
     render(
       <MemoryRouter>
-        <StudentSocialFeed />
+        <ThemeProvider>
+          <NotificationProvider>
+          <StudentSocialFeed />
+          </NotificationProvider>
+        </ThemeProvider>
       </MemoryRouter>,
     )
 
@@ -519,7 +581,11 @@ describe('StudentSocialFeed', () => {
   it('uploads selected attachments as multipart file parts', async () => {
     render(
       <MemoryRouter>
-        <StudentSocialFeed />
+        <ThemeProvider>
+          <NotificationProvider>
+          <StudentSocialFeed />
+          </NotificationProvider>
+        </ThemeProvider>
       </MemoryRouter>,
     )
 
@@ -563,7 +629,11 @@ describe('StudentSocialFeed', () => {
 
     render(
       <MemoryRouter>
-        <StudentSocialFeed />
+        <ThemeProvider>
+          <NotificationProvider>
+          <StudentSocialFeed />
+          </NotificationProvider>
+        </ThemeProvider>
       </MemoryRouter>,
     )
 
@@ -574,7 +644,11 @@ describe('StudentSocialFeed', () => {
   it('updates likes without reloading the feed', async () => {
     render(
       <MemoryRouter>
-        <StudentSocialFeed />
+        <ThemeProvider>
+          <NotificationProvider>
+          <StudentSocialFeed />
+          </NotificationProvider>
+        </ThemeProvider>
       </MemoryRouter>,
     )
 
@@ -582,7 +656,7 @@ describe('StudentSocialFeed', () => {
 
     expect(await screen.findByRole('button', { name: 'Unlike · 3' })).toBeTruthy()
     expect(api.post).toHaveBeenCalledWith('/api/students/posts/post-1/likes')
-    expect(api.get).toHaveBeenCalledTimes(2)
+    expect(api.get).toHaveBeenCalledTimes(4)
   })
 
   it('loads comments and supports editing and deleting the current student’s comments', async () => {
@@ -610,7 +684,11 @@ describe('StudentSocialFeed', () => {
 
     render(
       <MemoryRouter>
-        <StudentSocialFeed />
+        <ThemeProvider>
+          <NotificationProvider>
+          <StudentSocialFeed />
+          </NotificationProvider>
+        </ThemeProvider>
       </MemoryRouter>,
     )
 

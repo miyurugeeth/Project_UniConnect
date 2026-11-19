@@ -2,9 +2,11 @@ package com.uniconnect.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
@@ -49,16 +51,23 @@ public class StudentFollow {
     private StudentProfile following;
 
     @NotNull
+    @Enumerated(jakarta.persistence.EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 20)
+    private FollowStatus status;
+
+    @NotNull
     @JdbcTypeCode(SqlTypes.TIMESTAMP)
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
     protected StudentFollow() {
+        this.status = FollowStatus.PENDING;
     }
 
     public StudentFollow(StudentProfile follower, StudentProfile following) {
         this.follower = follower;
         this.following = following;
+        this.status = FollowStatus.PENDING;
     }
 
     @PrePersist
@@ -76,6 +85,14 @@ public class StudentFollow {
 
     public StudentProfile getFollowing() {
         return following;
+    }
+
+    public FollowStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(FollowStatus status) {
+        this.status = status;
     }
 
     public Instant getCreatedAt() {

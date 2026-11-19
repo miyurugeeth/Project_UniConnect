@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../services/api'
 import { useAuth } from '../context/useAuth'
+import ThemeToggle from '../components/ThemeToggle'
+import NotificationBell from '../components/NotificationBell'
 import './SocialNetworking.css'
 
 const PAGE_SIZE = 10
@@ -520,6 +522,11 @@ function StudentSocialFeed() {
         <Link className="social-back-link" to="/student/dashboard">
           My profile
         </Link>
+        <Link className="social-back-link" to="/messages">
+          Messages
+        </Link>
+        <ThemeToggle />
+        <NotificationBell />
       </header>
 
       <div className="social-content">

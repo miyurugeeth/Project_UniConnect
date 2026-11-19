@@ -6,15 +6,18 @@ import {
   GraduationCap,
   Image,
   LogOut,
+  MessageSquareText,
   Pencil,
   RefreshCw,
   UserRound,
 } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/useAuth'
 import { api } from '../services/api'
 import PasswordChangeForm from './PasswordChangeForm'
 import ProfessionalProfileEditForm from './ProfessionalProfileEditForm'
+import ThemeToggle from '../components/ThemeToggle'
+import NotificationBell from '../components/NotificationBell'
 import './Dashboard.css'
 
 function ProfessionalDashboard() {
@@ -107,7 +110,13 @@ function ProfessionalDashboard() {
           </span>
         </a>
         <div className="dashboard-header__actions">
+          <Link className="dashboard-logout" to="/messages" aria-label="Messages">
+            <MessageSquareText size={16} aria-hidden="true" />
+            <span>Messages</span>
+          </Link>
           <span className="dashboard-role">Professional space</span>
+          <ThemeToggle />
+          <NotificationBell />
           <button className="dashboard-logout" type="button" onClick={handleLogout}>
             <LogOut size={16} aria-hidden="true" />
             <span>Log out</span>

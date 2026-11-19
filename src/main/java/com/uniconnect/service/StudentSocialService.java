@@ -15,6 +15,7 @@ import com.uniconnect.dto.social.StudentProfileResponse;
 import com.uniconnect.dto.social.StudentSummaryResponse;
 import com.uniconnect.entity.PostCategory;
 import com.uniconnect.entity.PostMediaType;
+import com.uniconnect.entity.FollowStatus;
 import com.uniconnect.entity.RoleCode;
 import com.uniconnect.entity.StudentPost;
 import com.uniconnect.entity.StudentPostAttachment;
@@ -22,6 +23,7 @@ import com.uniconnect.entity.StudentPostComment;
 import com.uniconnect.entity.StudentPostLike;
 import com.uniconnect.entity.StudentFollow;
 import com.uniconnect.entity.StudentProfile;
+import com.uniconnect.entity.NotificationType;
 import com.uniconnect.exception.ProfileNotFoundException;
 import com.uniconnect.repository.PostCategoryRepository;
 import com.uniconnect.repository.StudentPostAttachmentRepository;
@@ -30,6 +32,7 @@ import com.uniconnect.repository.StudentPostLikeRepository;
 import com.uniconnect.repository.StudentPostRepository;
 import com.uniconnect.repository.StudentProfileRepository;
 import com.uniconnect.repository.StudentFollowRepository;
+import com.uniconnect.service.NotificationService;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -72,6 +75,7 @@ public class StudentSocialService {
     private final StudentFollowRepository followRepository;
     private final SocialMediaStorageService mediaStorageService;
     private final SocialMediaProperties mediaProperties;
+    private final NotificationService notificationService;
 
     public StudentSocialService(
             StudentProfileRepository studentProfileRepository,
@@ -82,7 +86,8 @@ public class StudentSocialService {
             StudentPostCommentRepository commentRepository,
             StudentFollowRepository followRepository,
             SocialMediaStorageService mediaStorageService,
-            SocialMediaProperties mediaProperties) {
+            SocialMediaProperties mediaProperties,
+            NotificationService notificationService) {
         this.studentProfileRepository = studentProfileRepository;
         this.studentPostRepository = studentPostRepository;
         this.postCategoryRepository = postCategoryRepository;
@@ -92,6 +97,7 @@ public class StudentSocialService {
         this.followRepository = followRepository;
         this.mediaStorageService = mediaStorageService;
         this.mediaProperties = mediaProperties;
+        this.notificationService = notificationService;
     }
 
     @Transactional(readOnly = true)
@@ -115,14 +121,21 @@ public class StudentSocialService {
         }
         StudentProfile follower = requireStudentProfile(currentStudentId);
         StudentProfile following = requireStudentProfile(studentId);
-        if (!followRepository.existsByFollower_IdAndFollowing_Id(
-                currentStudentId, studentId)) {
+        boolean alreadyFollowing =
+                followRepository.existsByFollower_IdAndFollowing_Id(currentStudentId, studentId);
+        if (!alreadyFollowing) {
             try {
                 followRepository.saveAndFlush(new StudentFollow(follower, following));
             } catch (DataIntegrityViolationException exception) {
                 throw new ResponseStatusException(
                         HttpStatus.CONFLICT, "The student is already followed.");
             }
+            notificationService.createNotification(
+                    following.getId(),
+                    follower.getId(),
+                    NotificationType.FOLLOW_REQUEST,
+                    follower.getUser().getFullName() + " started following you.",
+                    "/student/profiles/" + follower.getId());
         }
         return new StudentFollowResponse(
                 true, followRepository.countByFollowing_Id(studentId));
@@ -143,6 +156,35 @@ public class StudentSocialService {
                 false, followRepository.countByFollowing_Id(studentId));
     }
 
+    @Transactional
+    public StudentFollowResponse acceptFollow(UUID currentStudentId, UUID studentId) {
+        if (studentId.equals(currentStudentId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Students cannot accept their own follow request.");
+        }
+        requireStudentProfile(currentStudentId);
+        requireStudentProfile(studentId);
+        StudentFollow follow =
+                followRepository
+                        .findByFollower_IdAndFollowing_IdAndStatus(
+                                studentId, currentStudentId, FollowStatus.PENDING)
+                        .orElseThrow(
+                                () -> new ResponseStatusException(
+                                        HttpStatus.NOT_FOUND,
+                                        "No pending follow request from this student."));
+        follow.setStatus(FollowStatus.ACCEPTED);
+        followRepository.saveAndFlush(follow);
+        notificationService.createNotification(
+                studentId,
+                currentStudentId,
+                NotificationType.FOLLOW_ACCEPTED,
+                requireStudentProfile(currentStudentId).getUser().getFullName()
+                        + " accepted your follow request.",
+                "/student/profiles/" + currentStudentId);
+        return new StudentFollowResponse(
+                true, followRepository.countByFollowing_IdAndStatus(currentStudentId, FollowStatus.ACCEPTED));
+    }
+
     @Transactional(readOnly = true)
     public Page<StudentSummaryResponse> getFollowers(
             UUID studentId, int page, int size) {
@@ -161,6 +203,16 @@ public class StudentSocialService {
                 .findAllByFollower_IdOrderByCreatedAtDescIdDesc(
                         studentId, pageRequest(page, size))
                 .map(follow -> toSummaryResponse(follow.getFollowing()));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<StudentSummaryResponse> getFollowRequests(
+            UUID currentStudentId, int page, int size) {
+        requireStudentProfile(currentStudentId);
+        return followRepository
+                .findAllByFollowing_IdAndStatusOrderByCreatedAtDescIdDesc(
+                        currentStudentId, FollowStatus.PENDING, pageRequest(page, size))
+                .map(follow -> toSummaryResponse(follow.getFollower()));
     }
 
     @Transactional(readOnly = true)
@@ -330,12 +382,22 @@ public class StudentSocialService {
     public PostLikeResponse likePost(UUID currentStudentId, UUID postId) {
         StudentProfile student = requireStudentProfile(currentStudentId);
         StudentPost post = requirePost(postId);
-        if (!likeRepository.existsByPost_IdAndStudent_Id(postId, currentStudentId)) {
+        boolean alreadyLiked =
+                likeRepository.existsByPost_IdAndStudent_Id(postId, currentStudentId);
+        if (!alreadyLiked) {
             try {
                 likeRepository.saveAndFlush(new StudentPostLike(post, student));
             } catch (DataIntegrityViolationException exception) {
                 throw new ResponseStatusException(
                         HttpStatus.CONFLICT, "The post is already liked by this student.");
+            }
+            if (!post.getAuthor().getId().equals(student.getId())) {
+                notificationService.createNotification(
+                        post.getAuthor().getUser().getId(),
+                        student.getUser().getId(),
+                        NotificationType.POST_LIKE,
+                        student.getUser().getFullName() + " liked your post.",
+                        "/student/feed");
             }
         }
         return new PostLikeResponse(likeRepository.countByPost_Id(postId), true);
@@ -368,6 +430,14 @@ public class StudentSocialService {
         StudentPostComment comment =
                 commentRepository.save(
                         new StudentPostComment(post, author, request.content().trim()));
+        if (!post.getAuthor().getId().equals(author.getId())) {
+            notificationService.createNotification(
+                    post.getAuthor().getUser().getId(),
+                    author.getUser().getId(),
+                    NotificationType.POST_COMMENT,
+                    author.getUser().getFullName() + " commented on your post.",
+                    "/student/feed");
+        }
         return toCommentResponse(comment);
     }
 

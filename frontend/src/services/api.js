@@ -33,11 +33,37 @@ export function clearStoredAuthentication() {
 }
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
+  baseURL:
+    import.meta.env.VITE_API_BASE_URL ||
+    (import.meta.env.DEV ? '' : 'http://localhost:8080'),
   headers: {
     'Content-Type': 'application/json',
   },
 })
+
+export function getNotifications(page = 0, size = 20) {
+  return api.get('/api/notifications', { params: { page, size } })
+}
+
+export function getUnreadCount() {
+  return api.get('/api/notifications/unread-count')
+}
+
+export function markNotificationAsRead(notificationId) {
+  return api.put(`/api/notifications/${notificationId}/read`)
+}
+
+export function markAllNotificationsAsRead() {
+  return api.put('/api/notifications/read-all')
+}
+
+export function deleteNotification(notificationId) {
+  return api.delete(`/api/notifications/${notificationId}`)
+}
+
+export function acceptFollowRequest(studentId) {
+  return api.post(`/api/students/${studentId}/follow/accept`)
+}
 
 api.interceptors.request.use((config) => {
   const isLoginRequest = config.url?.includes('/api/auth/login')

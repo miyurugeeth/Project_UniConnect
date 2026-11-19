@@ -3,6 +3,7 @@ import { afterEach, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { api } from '../services/api'
+import { ThemeProvider } from '../context/ThemeContext.jsx'
 import StudentProfile from './StudentProfile'
 
 vi.mock('../services/api', () => ({
@@ -40,9 +41,11 @@ it('loads and displays the selected student profile', async () => {
 
   render(
     <MemoryRouter initialEntries={['/student/profiles/student-2']}>
-      <Routes>
-        <Route path="/student/profiles/:studentId" element={<StudentProfile />} />
-      </Routes>
+      <ThemeProvider>
+        <Routes>
+          <Route path="/student/profiles/:studentId" element={<StudentProfile />} />
+        </Routes>
+      </ThemeProvider>
     </MemoryRouter>,
   )
 
@@ -81,9 +84,11 @@ it('follows a student and loads their followers', async () => {
 
   render(
     <MemoryRouter initialEntries={['/student/profiles/student-2']}>
-      <Routes>
-        <Route path="/student/profiles/:studentId" element={<StudentProfile />} />
-      </Routes>
+      <ThemeProvider>
+        <Routes>
+          <Route path="/student/profiles/:studentId" element={<StudentProfile />} />
+        </Routes>
+      </ThemeProvider>
     </MemoryRouter>,
   )
 

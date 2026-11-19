@@ -35,6 +35,8 @@ Use a dedicated least-privilege database login. For production SQL Server connec
 - Multiple private photo attachments and one video per post; previews and attachment retention/removal are supported during editing.
 - Like/unlike controls with a unique database constraint and per-student liked state.
 - Paginated comments with author information and owner-only edit/delete operations.
+- Authenticated one-to-one messages between users, with user search, conversation history, and a chat box that refreshes new messages every five seconds.
+- Notification system: post like/comment notifications, follow-request and follow-accepted notifications, notification bell with unread count, dropdown and dedicated notifications page, mark-as-read / mark-all-as-read / delete, click-to-navigate, and per-user notification isolation.
 
 Student identity for protected post, like, and comment actions comes from the authenticated JWT, not a client-supplied student ID.
 
@@ -61,33 +63,54 @@ Flyway applies versioned migrations from `src/main/resources/db/migration` durin
 - V5: likes and the unique post/student constraint.
 - V6: comments and post/comment indexes.
 - V7: student follow relationships, self-follow check, uniqueness, and follower/following indexes.
+- V8: persistent direct messages, participant foreign keys, self-message prevention, and conversation indexes.
+- V9: notifications table (recipient, actor, type, message, link target, read state).
+- V10: follow status column (`PENDING`/`ACCEPTED`) on `student_follows` for the follow-request/accept flow.
 
 **Before starting the backend against a database that needs these migrations:**
 
 1. Verify the selected database is `UniConnect_Test` (or the explicitly intended target).
 2. Verify V1 and V2 history and V2 checksum compatibility; confirm the expected pending migration versions.
-3. Review V3–V7 and create/verify a restorable database backup.
+3. Review V3–V8 and create/verify a restorable database backup.
 4. Obtain approval for the database-changing startup. Flyway will run through the normal application startup; do not execute migration SQL manually in SSMS.
 
 Do not modify V1 or V2 to resolve checksum or schema issues. Stop and investigate any unexpected migration history or validation error before proceeding.
 
 ## Start the application
 
-First configure the environment variables above in the same terminal/session. Then, from the repository root:
+Use the VS Code integrated terminal. The backend and frontend need two separate terminals, and the SQL Server database must be running.
 
-```powershell
-.\mvnw.cmd spring-boot:run
+### Terminal 1: backend
+
+Open a terminal from **Terminal → New Terminal**, then run this from the repository root:
+
+```bash
+cd /workspaces/Project_UniConnect
+./run-backend.sh
 ```
 
-In another terminal:
+The script loads the root `.env` file when present. Otherwise, it asks for the SQL Server username and hidden password and generates a private JWT signing key in `~/.uniconnect-jwt-secret` the first time it runs. Maven starts Spring Boot with its full dependency classpath. Keep this terminal open while using the app. Do not start the backend with `debugjava -cp target/classes`; that omits Spring dependencies. The JDBC URL is quoted so its semicolons are not treated as shell command separators.
 
-```powershell
-Set-Location frontend
-npm ci
-npm run dev
+For a local SQL Server using its default self-signed certificate, use the development-only connection string below. It overrides `DB_URL` from `.env` without changing that file. Do not use `trustServerCertificate=true` for production.
+
+```bash
+DB_URL='jdbc:sqlserver://localhost:1433;databaseName=UniConnect_Test;encrypt=true;trustServerCertificate=true' ./run-backend.sh
 ```
 
-The frontend uses the shared Axios API client and defaults to `http://localhost:8080`; set `VITE_API_BASE_URL` when the backend uses another base URL.
+### Terminal 2: frontend
+
+Open a second terminal (**Terminal → New Terminal**) and run:
+
+```bash
+cd /workspaces/Project_UniConnect/frontend
+npm run dev -- --host 0.0.0.0
+```
+
+Open the **Local** URL printed by Vite (usually `http://localhost:5173`; it may choose `5174` if `5173` is busy). If this is a fresh setup and frontend dependencies are missing, run `npm ci` in the `frontend` folder once before starting Vite.
+
+To stop the app, press **Ctrl+C** in both terminals. Closing VS Code also stops the app; reopen the project and repeat these steps when you want to run it again.
+
+During development, Vite proxies `/api` requests to `http://localhost:8080`, avoiding cross-origin issues when Vite selects a different port. Set `VITE_API_BASE_URL` when using a direct API endpoint instead of the development proxy.
 
 ## Tests and checks
 
