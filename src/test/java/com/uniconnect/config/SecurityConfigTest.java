@@ -162,6 +162,17 @@ class SecurityConfigTest {
     }
 
     @Test
+    void requiresAuthenticationForMessagesAndAllowsEveryAuthenticatedRole() throws Exception {
+        mockMvc.perform(get("/api/messages/probe")).andExpect(status().isUnauthorized());
+        for (String role : List.of("STUDENT", "PROFESSIONAL", "ADMIN")) {
+            mockMvc.perform(
+                            get("/api/messages/probe")
+                                    .header("Authorization", bearerToken(role)))
+                    .andExpect(status().isOk());
+        }
+    }
+
+    @Test
     void rejectsJwtWithUnknownRole() throws Exception {
         mockMvc.perform(
                         get("/api/users/me")
@@ -338,6 +349,11 @@ class SecurityConfigTest {
         @GetMapping("/api/professionals/probe")
         String professionalEndpoint() {
             return "professional";
+        }
+
+        @GetMapping("/api/messages/probe")
+        String messagesEndpoint() {
+            return "messages";
         }
     }
 

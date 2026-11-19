@@ -20,8 +20,12 @@ import com.uniconnect.dto.social.StudentPostRequest;
 import com.uniconnect.dto.social.StudentPostResponse;
 import com.uniconnect.dto.social.StudentProfileResponse;
 import com.uniconnect.dto.social.StudentSummaryResponse;
+import com.uniconnect.dto.social.StudentFollowResponse;
+import com.uniconnect.dto.notification.NotificationResponse;
 import com.uniconnect.entity.PostCategory;
 import com.uniconnect.entity.PostMediaType;
+import com.uniconnect.entity.FollowStatus;
+import com.uniconnect.entity.NotificationType;
 import com.uniconnect.entity.Role;
 import com.uniconnect.entity.RoleCode;
 import com.uniconnect.entity.StudentPost;
@@ -40,6 +44,7 @@ import com.uniconnect.repository.PostCategoryRepository;
 import com.uniconnect.repository.StudentPostRepository;
 import com.uniconnect.repository.StudentProfileRepository;
 import com.uniconnect.repository.StudentFollowRepository;
+import com.uniconnect.service.NotificationService;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
@@ -75,6 +80,7 @@ class StudentSocialServiceTest {
     @Mock private StudentPostCommentRepository commentRepository;
     @Mock private StudentFollowRepository followRepository;
     @Mock private SocialMediaStorageService mediaStorageService;
+    @Mock private NotificationService notificationService;
 
     private StudentSocialService studentSocialService;
 
@@ -90,7 +96,8 @@ class StudentSocialServiceTest {
                         commentRepository,
                         followRepository,
                         mediaStorageService,
-                        new SocialMediaProperties());
+                        new SocialMediaProperties(),
+                        notificationService);
     }
 
     @Test
@@ -506,6 +513,92 @@ class StudentSocialServiceTest {
         assertThrows(
                 ResponseStatusException.class,
                 () -> studentSocialService.followStudent(followerId, followerId));
+    }
+
+    @Test
+    void acceptFollowFlipsPendingRequestToAcceptedAndNotifiesRequester() {
+        UUID requesterId = UUID.randomUUID();
+        UUID recipientId = UUID.randomUUID();
+        StudentProfile requester = studentProfile(requesterId, "Requester");
+        StudentProfile recipient = studentProfile(recipientId, "Recipient");
+        StudentFollow pendingFollow = new StudentFollow(requester, recipient);
+        ReflectionTestUtils.setField(pendingFollow, "id", UUID.randomUUID());
+
+        when(studentProfileRepository.findWithUserById(recipientId))
+                .thenReturn(Optional.of(recipient));
+        when(studentProfileRepository.findWithUserById(requesterId))
+                .thenReturn(Optional.of(requester));
+        when(followRepository.findByFollower_IdAndFollowing_IdAndStatus(
+                        eq(requesterId), eq(recipientId), eq(FollowStatus.PENDING)))
+                .thenReturn(Optional.of(pendingFollow));
+        when(followRepository.countByFollowing_IdAndStatus(recipientId, FollowStatus.ACCEPTED))
+                .thenReturn(1L);
+        when(notificationService.createNotification(
+                        eq(requesterId), eq(recipientId), eq(NotificationType.FOLLOW_ACCEPTED),
+                        anyString(), anyString()))
+                .thenReturn(
+                        new NotificationResponse(
+                                UUID.randomUUID(),
+                                "FOLLOW_ACCEPTED",
+                                "Recipient accepted your follow request.",
+                                "/student/profiles/" + recipientId,
+                                false,
+                                Instant.now(),
+                                recipientId,
+                                "Recipient",
+                                null));
+
+        StudentFollowResponse response = studentSocialService.acceptFollow(recipientId, requesterId);
+
+        assertTrue(response.following());
+        assertEquals(1L, response.followerCount());
+        assertEquals(FollowStatus.ACCEPTED, pendingFollow.getStatus());
+        verify(followRepository).saveAndFlush(pendingFollow);
+        verify(notificationService)
+                .createNotification(
+                        eq(requesterId),
+                        eq(recipientId),
+                        eq(NotificationType.FOLLOW_ACCEPTED),
+                        anyString(),
+                        anyString());
+    }
+
+    @Test
+    void acceptFollowThrowsWhenNoPendingRequestExists() {
+        UUID requesterId = UUID.randomUUID();
+        UUID recipientId = UUID.randomUUID();
+        when(studentProfileRepository.findWithUserById(recipientId))
+                .thenReturn(Optional.of(studentProfile(recipientId, "Recipient")));
+        when(studentProfileRepository.findWithUserById(requesterId))
+                .thenReturn(Optional.of(studentProfile(requesterId, "Requester")));
+        when(followRepository.findByFollower_IdAndFollowing_IdAndStatus(
+                        eq(requesterId), eq(recipientId), eq(FollowStatus.PENDING)))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                ResponseStatusException.class,
+                () -> studentSocialService.acceptFollow(recipientId, requesterId));
+    }
+
+    @Test
+    void getFollowRequestsReturnsPendingIncomingRequests() {
+        UUID recipientId = UUID.randomUUID();
+        UUID requesterId = UUID.randomUUID();
+        StudentProfile recipient = studentProfile(recipientId, "Recipient");
+        StudentProfile requester = studentProfile(requesterId, "Requester");
+        StudentFollow pendingFollow = new StudentFollow(requester, recipient);
+
+        when(studentProfileRepository.findWithUserById(recipientId))
+                .thenReturn(Optional.of(recipient));
+        when(followRepository.findAllByFollowing_IdAndStatusOrderByCreatedAtDescIdDesc(
+                        eq(recipientId), eq(FollowStatus.PENDING), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(pendingFollow), PageRequest.of(0, 20), 1));
+
+        Page<StudentSummaryResponse> requests =
+                studentSocialService.getFollowRequests(recipientId, 0, 20);
+
+        assertEquals(1, requests.getTotalElements());
+        assertEquals(requesterId, requests.getContent().getFirst().id());
     }
 
     private static StudentProfile studentProfile(UUID id, String fullName) {

@@ -72,6 +72,21 @@ public class StudentSocialController {
         return studentSocialService.unfollowStudent(currentStudentId(principal), studentId);
     }
 
+    @PostMapping("/{studentId}/follow/accept")
+    public StudentFollowResponse acceptFollow(
+            @AuthenticationPrincipal Jwt principal, @PathVariable UUID studentId) {
+        return studentSocialService.acceptFollow(currentStudentId(principal), studentId);
+    }
+
+    @GetMapping("/follow-requests")
+    public Page<StudentSummaryResponse> getFollowRequests(
+            @AuthenticationPrincipal Jwt principal,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return studentSocialService.getFollowRequests(
+                currentStudentId(principal), page, size);
+    }
+
     @GetMapping("/{studentId}/followers")
     public Page<StudentSummaryResponse> getFollowers(
             @PathVariable UUID studentId,

@@ -99,7 +99,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #e5c27b;
+  color: var(--gold);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 1.6px;
@@ -298,12 +298,12 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  color: #8992a0;
+  color: var(--text-muted);
   font-size: 11px;
 }
 
 .secure-note svg {
-  color: #718198;
+  color: var(--text-muted);
 }
 
 .login-card {
@@ -317,7 +317,7 @@
 }
 
 .welcome-tag {
-  color: #a37a28;
+  color: var(--gold);
   font-size: 10px;
   letter-spacing: 1.5px;
 }
@@ -351,7 +351,7 @@
 
 .form-field label,
 .field-label-row label {
-  color: #27374c;
+  color: var(--text-dark);
   font-size: 12px;
   font-weight: 650;
 }
@@ -369,7 +369,7 @@
   align-items: center;
   gap: 11px;
   padding: 0 14px;
-  color: #8995a5;
+  color: var(--text-muted);
   border: 1px solid #e1e4e9;
   border-radius: 9px;
   background: rgba(255, 255, 255, 0.86);
@@ -380,7 +380,7 @@
 }
 
 .input-shell:focus-within {
-  border-color: #8ca0ba;
+  border-color: var(--navy);
   background: var(--white);
   box-shadow: 0 0 0 3px rgba(23, 54, 93, 0.08);
 }
@@ -397,7 +397,7 @@
   width: 100%;
   min-width: 0;
   padding: 14px 0;
-  color: #26364a;
+  color: var(--input-text);
   border: 0;
   outline: 0;
   background: transparent;
@@ -405,7 +405,7 @@
 }
 
 .input-shell input::placeholder {
-  color: #a4acb7;
+  color: var(--text-muted);
   opacity: 1;
 }
 
@@ -420,7 +420,7 @@
   height: 32px;
   place-items: center;
   padding: 0;
-  color: #8792a0;
+  color: var(--text-muted);
   border: 0;
   border-radius: 6px;
   background: transparent;
@@ -437,7 +437,7 @@
   width: fit-content;
   align-items: center;
   gap: 5px;
-  color: #9a7123;
+  color: var(--gold);
   font-size: 11px;
   font-weight: 600;
   text-decoration: none;
@@ -461,7 +461,7 @@
   width: fit-content;
   align-items: center;
   gap: 9px;
-  color: #657185;
+  color: var(--text-muted);
   font-size: 12px;
   cursor: pointer;
   user-select: none;
@@ -551,7 +551,7 @@
 .form-message {
   min-height: 16px;
   margin: -13px 0 -7px;
-  color: #6b7786;
+  color: var(--text-muted);
   font-size: 11px;
   line-height: 1.5;
 }
@@ -562,7 +562,7 @@
   justify-content: center;
   gap: 6px;
   margin-top: 27px;
-  color: #788393;
+  color: var(--text-muted);
   font-size: 12px;
 }
 
@@ -573,13 +573,13 @@
 
 .terms-note {
   margin: 36px 0 0;
-  color: #9aa2ad;
+  color: var(--text-muted);
   font-size: 10px;
   text-align: center;
 }
 
 .terms-note a {
-  color: #68778b;
+  color: var(--text-muted);
   text-decoration: none;
 }
 
@@ -587,7 +587,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #9aa2ad;
+  color: var(--text-muted);
   font-size: 10px;
 }
 

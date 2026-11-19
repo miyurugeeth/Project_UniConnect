@@ -59,6 +59,10 @@ public class SecurityConfig {
                                                 "/api/users/me",
                                                 "/api/users/me/password")
                                         .authenticated()
+                                        .requestMatchers("/api/messages/**")
+                                        .authenticated()
+                                        .requestMatchers("/api/notifications/**")
+                                        .authenticated()
                                         .requestMatchers(HttpMethod.GET, "/api/users/{id}")
                                         .permitAll()
                                         .requestMatchers("/api/admin/**")

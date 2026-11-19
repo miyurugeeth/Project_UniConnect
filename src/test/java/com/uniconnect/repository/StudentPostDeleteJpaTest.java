@@ -14,6 +14,7 @@ import com.uniconnect.entity.StudentPostLike;
 import com.uniconnect.entity.StudentProfile;
 import com.uniconnect.entity.User;
 import com.uniconnect.config.SocialMediaProperties;
+import com.uniconnect.service.NotificationService;
 import com.uniconnect.service.SocialMediaStorageService;
 import com.uniconnect.service.StudentSocialService;
 import jakarta.persistence.EntityManager;
@@ -213,6 +214,11 @@ class StudentPostDeleteJpaTest {
         @Bean
         SocialMediaStorageService socialMediaStorageService() {
             return Mockito.mock(SocialMediaStorageService.class);
+        }
+
+        @Bean
+        NotificationService notificationService() {
+            return Mockito.mock(NotificationService.class);
         }
     }
 }

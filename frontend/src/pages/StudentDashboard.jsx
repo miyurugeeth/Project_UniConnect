@@ -7,6 +7,7 @@ import {
   GraduationCap,
   Heart,
   LogOut,
+  MessageSquareText,
   Pencil,
   RefreshCw,
   UserRound,
@@ -16,6 +17,8 @@ import { useAuth } from '../context/useAuth'
 import { api } from '../services/api'
 import PasswordChangeForm from './PasswordChangeForm'
 import StudentProfileEditForm from './StudentProfileEditForm'
+import ThemeToggle from '../components/ThemeToggle'
+import NotificationBell from '../components/NotificationBell'
 import './Dashboard.css'
 
 function StudentDashboard() {
@@ -106,10 +109,16 @@ function StudentDashboard() {
           </span>
         </a>
         <div className="dashboard-header__actions">
+          <Link className="dashboard-logout" to="/messages" aria-label="Messages">
+            <MessageSquareText size={16} aria-hidden="true" />
+            <span>Messages</span>
+          </Link>
           <Link className="dashboard-edit-button" to="/student/feed">
             Student feed
           </Link>
           <span className="dashboard-role">Student space</span>
+          <ThemeToggle />
+          <NotificationBell />
           <button className="dashboard-logout" type="button" onClick={handleLogout}>
             <LogOut size={16} aria-hidden="true" />
             <span>Log out</span>

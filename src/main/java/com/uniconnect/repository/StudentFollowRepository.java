@@ -1,12 +1,15 @@
 package com.uniconnect.repository;
 
 import com.uniconnect.entity.StudentFollow;
+import com.uniconnect.entity.FollowStatus;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface StudentFollowRepository extends JpaRepository<StudentFollow, UUID> {
 
@@ -15,13 +18,24 @@ public interface StudentFollowRepository extends JpaRepository<StudentFollow, UU
     Optional<StudentFollow> findByFollower_IdAndFollowing_Id(
             UUID followerId, UUID followingId);
 
+    Optional<StudentFollow> findByFollower_IdAndFollowing_IdAndStatus(
+            UUID followerId, UUID followingId, FollowStatus status);
+
     long countByFollowing_Id(UUID followingId);
 
     long countByFollower_Id(UUID followerId);
 
+    long countByFollowing_IdAndStatus(UUID followingId, FollowStatus status);
+
+    long countByFollower_IdAndStatus(UUID followerId, FollowStatus status);
+
     @EntityGraph(attributePaths = {"follower", "follower.user"})
     Page<StudentFollow> findAllByFollowing_IdOrderByCreatedAtDescIdDesc(
             UUID followingId, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"follower", "follower.user"})
+    Page<StudentFollow> findAllByFollowing_IdAndStatusOrderByCreatedAtDescIdDesc(
+            UUID followingId, FollowStatus status, Pageable pageable);
 
     @EntityGraph(attributePaths = {"following", "following.user"})
     Page<StudentFollow> findAllByFollower_IdOrderByCreatedAtDescIdDesc(

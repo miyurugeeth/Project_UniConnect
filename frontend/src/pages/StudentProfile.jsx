@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api } from '../services/api'
 import { useAuth } from '../context/useAuth'
+import ThemeToggle from '../components/ThemeToggle'
+import NotificationBell from '../components/NotificationBell'
 import './SocialNetworking.css'
 
 function StudentProfile() {
@@ -98,6 +100,7 @@ function StudentProfile() {
         <Link className="social-back-link" to="/student/feed">
           Back to feed
         </Link>
+        <ThemeToggle />
       </header>
       <div className="social-content social-profile-content">
         {isLoading ? (
@@ -141,18 +144,26 @@ function StudentProfile() {
             </div>
             <div className="student-profile-social">
               {user?.userId !== profile.id && (
-                <button
-                  className="social-button"
-                  type="button"
-                  onClick={toggleFollow}
-                  disabled={isUpdatingFollow}
-                >
-                  {isUpdatingFollow
-                    ? 'Updating…'
-                    : profile.followedByCurrentUser
-                      ? 'Unfollow'
-                      : 'Follow'}
-                </button>
+                <>
+                  <Link
+                    className="social-button"
+                    to={`/messages?userId=${encodeURIComponent(profile.id)}`}
+                  >
+                    Message
+                  </Link>
+                  <button
+                    className="social-button"
+                    type="button"
+                    onClick={toggleFollow}
+                    disabled={isUpdatingFollow}
+                  >
+                    {isUpdatingFollow
+                      ? 'Updating…'
+                      : profile.followedByCurrentUser
+                        ? 'Unfollow'
+                        : 'Follow'}
+                  </button>
+                </>
               )}
               <button
                 className="social-text-button"

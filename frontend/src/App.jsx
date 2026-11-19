@@ -9,6 +9,8 @@ import StudentRegistration from './pages/StudentRegistration'
 import StudentDashboard from './pages/StudentDashboard'
 import StudentSocialFeed from './pages/StudentSocialFeed'
 import StudentProfile from './pages/StudentProfile'
+import Messages from './pages/Messages'
+import Notifications from './pages/Notifications'
 
 const dashboardPaths = {
   STUDENT: '/student/dashboard',
@@ -85,6 +87,22 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['STUDENT']}>
               <StudentProfile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/messages"
+          element={
+            <ProtectedRoute allowedRoles={['STUDENT', 'PROFESSIONAL', 'ADMIN']}>
+              <Messages />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute allowedRoles={['STUDENT', 'PROFESSIONAL', 'ADMIN']}>
+              <Notifications />
             </ProtectedRoute>
           }
         />
