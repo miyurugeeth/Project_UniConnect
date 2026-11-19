@@ -34,8 +34,8 @@ public class StudentPost {
     @JoinColumn(
             name = "author_user_id",
             nullable = false,
-            foreignKey = @ForeignKey(name = "fk_student_posts_student_profiles"))
-    private StudentProfile author;
+            foreignKey = @ForeignKey(name = "fk_student_posts_users"))
+    private User author;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -71,11 +71,16 @@ public class StudentPost {
     }
 
     public StudentPost(
-            StudentProfile author, String content, String imageUrl, PostCategory category) {
+            User author, String content, String imageUrl, PostCategory category) {
         this.author = author;
         this.content = content;
         this.imageUrl = imageUrl;
         this.category = category;
+    }
+
+    public StudentPost(
+            StudentProfile author, String content, String imageUrl, PostCategory category) {
+        this(author.getUser(), content, imageUrl, category);
     }
 
     @PrePersist
@@ -94,7 +99,7 @@ public class StudentPost {
         return id;
     }
 
-    public StudentProfile getAuthor() {
+    public User getAuthor() {
         return author;
     }
 

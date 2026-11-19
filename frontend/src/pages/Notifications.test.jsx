@@ -54,7 +54,11 @@ function renderPage(withNotifications = notifications) {
       data: { content: withNotifications, number: 0, totalPages: 1 },
     })
   })
-  vi.mocked(api.put).mockResolvedValue({})
+  vi.mocked(api.put).mockImplementation((url) =>
+    Promise.resolve({
+      data: { id: String(url).match(/notifications\/([^/]+)/)?.[1] || 'notif-1' },
+    }),
+  )
   vi.mocked(api.delete).mockResolvedValue({})
   vi.mocked(api.post).mockResolvedValue({})
   return render(

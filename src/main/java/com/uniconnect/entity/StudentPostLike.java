@@ -45,8 +45,8 @@ public class StudentPostLike {
     @JoinColumn(
             name = "student_user_id",
             nullable = false,
-            foreignKey = @ForeignKey(name = "fk_student_post_likes_students"))
-    private StudentProfile student;
+            foreignKey = @ForeignKey(name = "fk_student_post_likes_users"))
+    private User actor;
 
     @NotNull
     @JdbcTypeCode(SqlTypes.TIMESTAMP)
@@ -56,9 +56,13 @@ public class StudentPostLike {
     protected StudentPostLike() {
     }
 
-    public StudentPostLike(StudentPost post, StudentProfile student) {
+    public StudentPostLike(StudentPost post, User actor) {
         this.post = post;
-        this.student = student;
+        this.actor = actor;
+    }
+
+    public StudentPostLike(StudentPost post, StudentProfile student) {
+        this(post, student.getUser());
     }
 
     @PrePersist
@@ -74,8 +78,8 @@ public class StudentPostLike {
         return post;
     }
 
-    public StudentProfile getStudent() {
-        return student;
+    public User getActor() {
+        return actor;
     }
 
     public Instant getCreatedAt() {

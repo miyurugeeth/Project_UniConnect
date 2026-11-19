@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { api } from '../services/api'
 import { useAuth } from '../context/useAuth'
-import ThemeToggle from '../components/ThemeToggle'
-import NotificationBell from '../components/NotificationBell'
 import './SocialNetworking.css'
 
 const PAGE_SIZE = 10
@@ -60,6 +58,10 @@ function ProtectedPostMedia({ attachment }) {
 
 function StudentSocialFeed() {
   const { user } = useAuth()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const mineOnly = searchParams.get('mine') === 'true'
+  const connectionsView = searchParams.get('view') === 'connections'
+  const isComposerOpen = searchParams.get('compose') === 'true'
   const [feed, setFeed] = useState({ content: [], number: 0, totalPages: 0 })
   const [page, setPage] = useState(0)
   const [reloadKey, setReloadKey] = useState(0)
@@ -97,6 +99,27 @@ function StudentSocialFeed() {
   const [loadingCommentsFor, setLoadingCommentsFor] = useState(() => new Set())
   const [savingCommentsFor, setSavingCommentsFor] = useState(() => new Set())
   const [editingComment, setEditingComment] = useState(null)
+  const [myProfile, setMyProfile] = useState(null)
+  const [profileError, setProfileError] = useState('')
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    async function loadProfileSummary() {
+      try {
+        const response = await api.get('/api/users/me', { signal: controller.signal })
+        setMyProfile(response.data)
+        setProfileError('')
+      } catch {
+        if (!controller.signal.aborted) {
+          setProfileError('Your profile details could not be loaded.')
+        }
+      }
+    }
+
+    loadProfileSummary()
+    return () => controller.abort()
+  }, [])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -133,6 +156,7 @@ function StudentSocialFeed() {
           params: {
             page,
             size: PAGE_SIZE,
+            ...(mineOnly ? { mine: true } : {}),
             ...(feedCategoryCode ? { category: feedCategoryCode } : {}),
           },
           signal: controller.signal,
@@ -143,7 +167,7 @@ function StudentSocialFeed() {
           setFeedError(
             error.response?.status === 401
               ? 'Your session expired. Please sign in again.'
-              : 'We could not load the student feed. Please try again.',
+              : 'We could not load the community feed. Please try again.',
           )
         }
       } finally {
@@ -153,14 +177,20 @@ function StudentSocialFeed() {
 
     loadFeed()
     return () => controller.abort()
-  }, [page, reloadKey, feedCategoryCode])
+  }, [page, reloadKey, feedCategoryCode, mineOnly])
 
   useEffect(() => {
-    if (!editScrollRequest || !editingPostId) return
+    if (!editScrollRequest || !editingPostId || !isComposerOpen) return
 
     postComposerRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'start' })
     postContentInputRef.current?.focus({ preventScroll: true })
-  }, [editScrollRequest, editingPostId])
+  }, [editScrollRequest, editingPostId, isComposerOpen])
+
+  useEffect(() => {
+    if (isComposerOpen && !editingPostId) {
+      postContentInputRef.current?.focus({ preventScroll: true })
+    }
+  }, [isComposerOpen, editingPostId])
 
   useEffect(
     () => () => {
@@ -174,6 +204,21 @@ function StudentSocialFeed() {
     selectedAttachmentUrls.current.forEach((url) => URL.revokeObjectURL(url))
     selectedAttachmentUrls.current.clear()
     setSelectedAttachments([])
+  }
+
+  function setComposerOpen(open) {
+    setSearchParams(
+      (current) => {
+        const next = new URLSearchParams(current)
+        if (open) {
+          next.set('compose', 'true')
+        } else {
+          next.delete('compose')
+        }
+        return next
+      },
+      { replace: !open },
+    )
   }
 
   function handleAttachmentSelection(event) {
@@ -304,6 +349,7 @@ function StudentSocialFeed() {
   }
 
   function startEditing(post) {
+    setComposerOpen(true)
     clearSelectedAttachments()
     setEditingPostId(post.id)
     setContent(post.content)
@@ -317,6 +363,7 @@ function StudentSocialFeed() {
   }
 
   function cancelEditing() {
+    setComposerOpen(false)
     clearSelectedAttachments()
     setEditingPostId(null)
     setContent('')
@@ -512,37 +559,170 @@ function StudentSocialFeed() {
     categories.length === 0 ||
     retainedAttachments.length + selectedAttachments.length > MAX_ATTACHMENTS ||
     retainedVideoCount + selectedVideoCount > MAX_VIDEOS
+  const profileDetails =
+    myProfile?.studentProfile || myProfile?.professionalProfile || null
+  const profileImageUrl = myProfile?.profileImageUrl || user?.profileImageUrl
+  const profileSummary =
+    user?.role === 'PROFESSIONAL'
+      ? [
+          profileDetails?.jobPosition,
+          profileDetails?.companyName,
+        ].filter(Boolean).join(' · ')
+      : [
+          profileDetails?.faculty,
+          profileDetails?.universityName,
+          profileDetails?.batchYear ? `Batch ${profileDetails.batchYear}` : null,
+        ].filter(Boolean).join(' · ')
 
   return (
     <main className="social-page">
-      <header className="social-header">
-        <Link className="social-brand" to="/student/dashboard">
-          Uni<span>Connect</span>
-        </Link>
-        <Link className="social-back-link" to="/student/dashboard">
-          My profile
-        </Link>
-        <Link className="social-back-link" to="/messages">
-          Messages
-        </Link>
-        <ThemeToggle />
-        <NotificationBell />
-      </header>
-
       <div className="social-content">
-        <section className="social-intro">
-          <p className="social-eyebrow">STUDENT COMMUNITY</p>
-          <h1>Your student feed</h1>
-          <p>Share an update and discover students across the community.</p>
-        </section>
+        {!connectionsView && (
+          <>
+            <section className="social-intro social-welcome">
+              <div>
+                <p className="social-eyebrow">YOUR UNICONNECT COMMUNITY</p>
+                <h1>Your university journey, connected.</h1>
+                <p>Share an update, find inspiration, and grow with your community.</p>
+              </div>
+              <button
+                className="social-button social-welcome__create"
+                type="button"
+                onClick={() => setComposerOpen(true)}
+              >
+                Create post
+              </button>
+            </section>
 
-        <section
-          className="social-card social-composer"
-          aria-labelledby="composer-title"
-          ref={postComposerRef}
-        >
-          <h2 id="composer-title">{editingPostId ? 'Edit your post' : 'Create a post'}</h2>
-          <form onSubmit={handlePostSubmit}>
+            <section className="social-card social-member-summary" aria-label="Your profile summary">
+              {profileImageUrl ? (
+                <img
+                  className="social-member-summary__avatar"
+                  src={profileImageUrl}
+                  alt=""
+                  aria-hidden="true"
+                />
+              ) : (
+                <span className="social-member-summary__avatar" aria-hidden="true">
+                  {(myProfile?.fullName || user?.fullName || 'U')
+                    .split(/\s+/)
+                    .filter(Boolean)
+                    .slice(0, 2)
+                    .map((part) => part[0])
+                    .join('')
+                    .toUpperCase()}
+                </span>
+              )}
+              <div className="social-member-summary__details">
+                <p className="social-member-summary__label">WELCOME BACK</p>
+                <strong>{myProfile?.fullName || user?.fullName || 'UniConnect member'}</strong>
+                {profileSummary && <span>{profileSummary}</span>}
+                {profileError && (
+                  <span className="social-message social-message--error" role="status">
+                    {profileError}
+                  </span>
+                )}
+              </div>
+            </section>
+          </>
+        )}
+
+        {connectionsView && (
+          <section className="social-card social-search" aria-labelledby="search-title" id="people-search">
+            <p className="social-eyebrow">YOUR UNICONNECT COMMUNITY</p>
+            <h1 id="search-title">Connections</h1>
+            <p className="social-connections__description">
+              Find students by name, university, faculty, or department.
+            </p>
+            <form className="social-search-form" onSubmit={handleSearch}>
+              <label className="visually-hidden" htmlFor="student-search">
+                Search students
+              </label>
+              <input
+                id="student-search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Name, university, faculty, or department"
+              />
+              <button className="social-button" type="submit" disabled={isSearching}>
+                {isSearching ? 'Searching…' : 'Search'}
+              </button>
+            </form>
+            {searchMessage && (
+              <p className="social-message social-message--error" role="alert">
+                {searchMessage}
+              </p>
+            )}
+            {hasSearched && (
+              <div className="social-search-results" aria-live="polite">
+                {searchResults.length ? (
+                  searchResults.map((student) => (
+                    <Link
+                      className="student-result"
+                      key={student.id}
+                      to={
+                        user?.role === 'STUDENT'
+                          ? `/student/profiles/${student.id}`
+                          : `/messages?userId=${encodeURIComponent(student.id)}`
+                      }
+                    >
+                      <span className="student-result__name">{student.fullName}</span>
+                      <span>
+                        {[student.universityName, student.faculty, student.departmentOrField]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </span>
+                    </Link>
+                  ))
+                ) : (
+                  <p className="social-empty">No students matched that search.</p>
+                )}
+              </div>
+            )}
+          </section>
+        )}
+
+        {!isComposerOpen && postMessage && (
+          <p
+            className={`social-message ${postMessageIsError ? 'social-message--error' : 'social-message--success'}`}
+            role={postMessageIsError ? 'alert' : 'status'}
+          >
+            {postMessage}
+          </p>
+        )}
+
+        {isComposerOpen && !connectionsView && (
+          <div className="social-modal-backdrop" role="presentation">
+            <section
+              className="social-card social-composer social-composer-dialog"
+              aria-labelledby="composer-title"
+              id="create-post"
+              ref={postComposerRef}
+              role="dialog"
+              aria-modal="true"
+              onKeyDown={(event) => {
+                if (event.key === 'Escape' && !isSaving) {
+                  if (editingPostId) cancelEditing()
+                  else setComposerOpen(false)
+                }
+              }}
+            >
+              <div className="social-composer__heading">
+                <h2 id="composer-title">{editingPostId ? 'Edit your post' : 'Create a post'}</h2>
+                <button
+                  className="social-composer__close"
+                  type="button"
+                  aria-label="Close post composer"
+                  onClick={() => {
+                    if (editingPostId) cancelEditing()
+                    else setComposerOpen(false)
+                  }}
+                  disabled={isSaving}
+                >
+                  ×
+                </button>
+              </div>
+              <form onSubmit={handlePostSubmit}>
             <label className="social-label" htmlFor="post-content">
               Post text
             </label>
@@ -673,56 +853,28 @@ function StudentSocialFeed() {
                 {isSaving ? 'Saving…' : editingPostId ? 'Save changes' : 'Publish post'}
               </button>
             </div>
-          </form>
-        </section>
+              </form>
+            </section>
+          </div>
+        )}
 
-        <section className="social-card social-search" aria-labelledby="search-title">
-          <h2 id="search-title">Find students</h2>
-          <form className="social-search-form" onSubmit={handleSearch}>
-            <label className="visually-hidden" htmlFor="student-search">
-              Search students
-            </label>
-            <input
-              id="student-search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Name, university, faculty, or department"
-            />
-            <button className="social-button" type="submit" disabled={isSearching}>
-              {isSearching ? 'Searching…' : 'Search'}
-            </button>
-          </form>
-          {searchMessage && (
-            <p className="social-message social-message--error" role="alert">
-              {searchMessage}
-            </p>
-          )}
-          {hasSearched && (
-            <div className="social-search-results" aria-live="polite">
-              {searchResults.length ? (
-                searchResults.map((student) => (
-                  <Link
-                    className="student-result"
-                    key={student.id}
-                    to={`/student/profiles/${student.id}`}
-                  >
-                    <span className="student-result__name">{student.fullName}</span>
-                    <span>
-                      {[student.universityName, student.faculty, student.departmentOrField]
-                        .filter(Boolean)
-                        .join(' · ')}
-                    </span>
-                  </Link>
-                ))
-              ) : (
-                <p className="social-empty">No students matched that search.</p>
+        {!connectionsView && (
+          <section className="social-feed" aria-labelledby="feed-title">
+          <div className="social-feed__heading">
+            <div className="social-feed__title">
+              <h2 id="feed-title">{mineOnly ? 'My posts' : 'Latest Posts'}</h2>
+              {!mineOnly && (
+                <span className="social-feed__count">
+                  {feed.totalElements ?? feed.content?.length ?? 0} posts
+                </span>
               )}
             </div>
-          )}
-        </section>
-
-        <section className="social-feed" aria-labelledby="feed-title">
-          <h2 id="feed-title">Latest posts</h2>
+            {mineOnly && (
+              <Link className="social-button social-button--secondary" to="/student/feed">
+                View community feed
+              </Link>
+            )}
+          </div>
           <label className="social-label" htmlFor="feed-category">
             Filter by category
           </label>
@@ -762,12 +914,26 @@ function StudentSocialFeed() {
                 {feed.content.map((post) => (
                   <article className="social-card social-post" key={post.id}>
                     <div className="social-post__author">
-                      <Link to={`/student/profiles/${post.author.id}`}>
-                        {post.author.fullName}
-                      </Link>
+                      {user?.role === 'STUDENT' && post.author.role === 'STUDENT' ? (
+                        <Link to={`/student/profiles/${post.author.id}`}>
+                          {post.author.fullName}
+                        </Link>
+                      ) : (
+                        <strong>{post.author.fullName}</strong>
+                      )}
+                      <span className="social-post__role">
+                        {post.author.role === 'PROFESSIONAL' ? 'Industry professional' : 'University student'}
+                      </span>
                       <span>
-                        {[post.author.universityName, post.author.faculty]
-                          .filter(Boolean)
+                        {[
+                          post.author.role === 'PROFESSIONAL'
+                            ? post.author.jobPosition
+                            : post.author.faculty,
+                          post.author.role === 'PROFESSIONAL'
+                            ? post.author.companyName
+                            : post.author.universityName,
+                          post.author.role === 'PROFESSIONAL' ? post.author.industry : null,
+                        ].filter(Boolean)
                           .join(' · ')}
                       </span>
                       <time dateTime={post.createdAt}>
@@ -818,9 +984,13 @@ function StudentSocialFeed() {
                               {(commentsByPost[post.id]?.content || []).map((comment) => (
                                 <article className="social-comment" key={comment.id}>
                                   <div className="social-comment__heading">
-                                    <Link to={`/student/profiles/${comment.author.id}`}>
-                                      {comment.author.fullName}
-                                    </Link>
+                                    {user?.role === 'STUDENT' && comment.author.role === 'STUDENT' ? (
+                                      <Link to={`/student/profiles/${comment.author.id}`}>
+                                        {comment.author.fullName}
+                                      </Link>
+                                    ) : (
+                                      <strong>{comment.author.fullName}</strong>
+                                    )}
                                     <time dateTime={comment.createdAt}>
                                       {new Date(comment.createdAt).toLocaleString()}
                                     </time>
@@ -987,7 +1157,8 @@ function StudentSocialFeed() {
           ) : (
             <p className="social-empty">There are no posts yet. Share the first update.</p>
           )}
-        </section>
+          </section>
+        )}
       </div>
     </main>
   )

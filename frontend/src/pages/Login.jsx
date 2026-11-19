@@ -74,8 +74,8 @@ function Login() {
       const user = await login(email.trim(), password)
       setPassword('')
       const dashboardPaths = {
-        STUDENT: '/student/dashboard',
-        PROFESSIONAL: '/professional/dashboard',
+        STUDENT: '/student/feed',
+        PROFESSIONAL: '/student/feed',
         ADMIN: '/admin/dashboard',
       }
       navigate(dashboardPaths[user.role] || '/login', { replace: true })

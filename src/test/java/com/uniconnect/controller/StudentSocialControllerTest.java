@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.uniconnect.config.JwtConfiguration;
 import com.uniconnect.config.SecurityConfig;
+import com.uniconnect.dto.social.PostAuthorResponse;
 import com.uniconnect.dto.social.PostCategoryResponse;
 import com.uniconnect.dto.social.PostLikeResponse;
 import com.uniconnect.dto.social.StudentFollowResponse;
@@ -25,7 +26,6 @@ import com.uniconnect.dto.social.StudentPostCommentResponse;
 import com.uniconnect.dto.social.StudentPostRequest;
 import com.uniconnect.dto.social.StudentPostResponse;
 import com.uniconnect.dto.social.StudentProfileResponse;
-import com.uniconnect.dto.social.StudentSummaryResponse;
 import com.uniconnect.service.StudentSocialService;
 import java.time.Instant;
 import java.util.Base64;
@@ -100,13 +100,18 @@ class StudentSocialControllerTest {
     }
 
     @Test
-    void requiresStudentAuthenticationAndUsesJwtSubjectForPostOwnership() throws Exception {
+    void requiresCommunityAuthenticationAndUsesJwtSubjectForPostOwnership() throws Exception {
         UUID authenticatedStudentId = UUID.randomUUID();
+        UUID authenticatedProfessionalId = UUID.randomUUID();
         UUID clientSuppliedId = UUID.randomUUID();
         StudentPostResponse response = postResponse(authenticatedStudentId);
+        StudentPostResponse professionalResponse = postResponse(authenticatedProfessionalId);
         when(studentSocialService.createPost(
                         eq(authenticatedStudentId), any(StudentPostRequest.class)))
                 .thenReturn(response);
+        when(studentSocialService.createPost(
+                        eq(authenticatedProfessionalId), any(StudentPostRequest.class)))
+                .thenReturn(professionalResponse);
 
         mockMvc.perform(
                         post("/api/students/posts")
@@ -130,25 +135,38 @@ class StudentSocialControllerTest {
                 .andExpect(jsonPath("$.author.id").value(org.hamcrest.Matchers.not(
                         clientSuppliedId.toString())));
 
+        mockMvc.perform(
+                        post("/api/students/posts")
+                                .header("Authorization", bearerToken(authenticatedProfessionalId, "PROFESSIONAL"))
+                                .contentType("application/json")
+                                .content(
+                                        "{\"content\":\"A professional post\","
+                                                + "\"categoryCode\":\"GENERAL_UNIVERSITY_LIFE\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.author.id").value(authenticatedProfessionalId.toString()));
+
         ArgumentCaptor<StudentPostRequest> requestCaptor =
                 ArgumentCaptor.forClass(StudentPostRequest.class);
         verify(studentSocialService)
                 .createPost(eq(authenticatedStudentId), requestCaptor.capture());
+        verify(studentSocialService)
+                .createPost(eq(authenticatedProfessionalId), any(StudentPostRequest.class));
         org.junit.jupiter.api.Assertions.assertEquals("A post", requestCaptor.getValue().content());
     }
 
     @Test
-    void limitsSocialRoutesToStudentsAndSupportsPaginatedFeed() throws Exception {
+    void allowsBothCommunityRolesToReadThePaginatedFeed() throws Exception {
         UUID studentId = UUID.randomUUID();
         Page<StudentPostResponse> feed =
                 new PageImpl<>(List.of(postResponse(studentId)), PageRequest.of(0, 20), 1);
         when(studentSocialService.getFeed(studentId, 2, 10, "ICT_COMPUTING"))
                 .thenReturn(feed);
+        when(studentSocialService.getFeed(studentId, 0, 20, null)).thenReturn(feed);
 
         mockMvc.perform(
                         get("/api/students/feed")
                                 .header("Authorization", bearerToken(studentId, "PROFESSIONAL")))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isOk());
 
         mockMvc.perform(
                         get("/api/students/feed?page=2&size=10&category=ICT_COMPUTING")
@@ -157,15 +175,19 @@ class StudentSocialControllerTest {
                 .andExpect(jsonPath("$.content[0].content").value("A post"))
                 .andExpect(jsonPath("$.content[0].author.fullName").value("Student"));
 
+        verify(studentSocialService).getFeed(studentId, 0, 20, null);
         verify(studentSocialService).getFeed(studentId, 2, 10, "ICT_COMPUTING");
     }
 
     @Test
-    void likeEndpointRequiresStudentJwtAndUsesItsSubject() throws Exception {
+    void likeEndpointAllowsBothCommunityRolesAndUsesTheirSubjects() throws Exception {
         UUID studentId = UUID.randomUUID();
+        UUID professionalId = UUID.randomUUID();
         UUID postId = UUID.randomUUID();
         when(studentSocialService.likePost(studentId, postId))
                 .thenReturn(new PostLikeResponse(1, true));
+        when(studentSocialService.likePost(professionalId, postId))
+                .thenReturn(new PostLikeResponse(2, true));
 
         mockMvc.perform(post("/api/students/posts/{postId}/likes", postId))
                 .andExpect(status().isUnauthorized());
@@ -176,7 +198,14 @@ class StudentSocialControllerTest {
                 .andExpect(jsonPath("$.likeCount").value(1))
                 .andExpect(jsonPath("$.likedByCurrentUser").value(true));
 
+        mockMvc.perform(
+                        post("/api/students/posts/{postId}/likes", postId)
+                                .header("Authorization", bearerToken(professionalId, "PROFESSIONAL")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.likeCount").value(2));
+
         verify(studentSocialService).likePost(studentId, postId);
+        verify(studentSocialService).likePost(professionalId, postId);
     }
 
     @Test
@@ -285,13 +314,17 @@ class StudentSocialControllerTest {
                         "A comment",
                         timestamp,
                         timestamp,
-                        new StudentSummaryResponse(
+                        new PostAuthorResponse(
                                 authorId,
                                 "Comment Author",
                                 null,
+                                "STUDENT",
                                 "Example University",
                                 "Science",
-                                "Computer Science"));
+                                "Computer Science",
+                                null,
+                                null,
+                                null));
         when(studentSocialService.getComments(postId, 0, 10))
                 .thenReturn(
                         new PageImpl<>(
@@ -375,13 +408,17 @@ class StudentSocialControllerTest {
                 null,
                 Instant.parse("2026-01-01T00:00:00Z"),
                 Instant.parse("2026-01-01T00:00:00Z"),
-                new StudentSummaryResponse(
+                new PostAuthorResponse(
                         studentId,
                         "Student",
                         null,
+                        "STUDENT",
                         "University of Colombo",
                         "Science",
-                        "Computer Science"),
+                        "Computer Science",
+                        null,
+                        null,
+                        null),
                 new PostCategoryResponse(
                         "GENERAL_UNIVERSITY_LIFE", "General University Life"),
                 List.of(),

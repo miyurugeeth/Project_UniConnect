@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ArrowLeft, MessageSquareText, Search, Send } from 'lucide-react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/useAuth'
 import { api } from '../services/api'
-import ThemeToggle from '../components/ThemeToggle'
 import './Messages.css'
 
 const POLL_INTERVAL_MS = 5000
@@ -274,29 +273,8 @@ function Messages() {
     }
   }
 
-  const dashboardPath =
-    user?.role === 'PROFESSIONAL'
-      ? '/professional/dashboard'
-      : user?.role === 'ADMIN'
-        ? '/admin/dashboard'
-        : '/student/dashboard'
-
   return (
     <main className="messages-page">
-      <header className="messages-header">
-        <Link className="messages-brand" to={dashboardPath}>
-          <span className="messages-brand__icon">
-            <MessageSquareText size={19} aria-hidden="true" />
-          </span>
-          Uni<span>Connect</span>
-        </Link>
-        <Link className="messages-back-link" to={dashboardPath}>
-          <ArrowLeft size={15} aria-hidden="true" />
-          Dashboard
-        </Link>
-        <ThemeToggle />
-      </header>
-
       <section className="messages-layout" aria-label="Messages">
         <aside className="messages-sidebar">
           <div className="messages-sidebar__heading">

@@ -6,24 +6,16 @@ import {
   CalendarDays,
   GraduationCap,
   Heart,
-  LogOut,
-  MessageSquareText,
   Pencil,
   RefreshCw,
   UserRound,
 } from 'lucide-react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/useAuth'
 import { api } from '../services/api'
 import PasswordChangeForm from './PasswordChangeForm'
 import StudentProfileEditForm from './StudentProfileEditForm'
-import ThemeToggle from '../components/ThemeToggle'
-import NotificationBell from '../components/NotificationBell'
 import './Dashboard.css'
 
 function StudentDashboard() {
-  const { logout } = useAuth()
-  const navigate = useNavigate()
   const [profile, setProfile] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
@@ -71,11 +63,6 @@ function StudentDashboard() {
     return () => controller.abort()
   }, [reloadKey])
 
-  function handleLogout() {
-    logout()
-    navigate('/login', { replace: true })
-  }
-
   function retryLoadingProfile() {
     setProfile(null)
     setImageFailed(false)
@@ -99,33 +86,6 @@ function StudentDashboard() {
 
   return (
     <main className="dashboard-page">
-      <header className="dashboard-header">
-        <a className="dashboard-brand" href="/" aria-label="UniConnect home">
-          <span className="dashboard-brand__icon">
-            <GraduationCap size={22} aria-hidden="true" />
-          </span>
-          <span>
-            Uni<span>Connect</span>
-          </span>
-        </a>
-        <div className="dashboard-header__actions">
-          <Link className="dashboard-logout" to="/messages" aria-label="Messages">
-            <MessageSquareText size={16} aria-hidden="true" />
-            <span>Messages</span>
-          </Link>
-          <Link className="dashboard-edit-button" to="/student/feed">
-            Student feed
-          </Link>
-          <span className="dashboard-role">Student space</span>
-          <ThemeToggle />
-          <NotificationBell />
-          <button className="dashboard-logout" type="button" onClick={handleLogout}>
-            <LogOut size={16} aria-hidden="true" />
-            <span>Log out</span>
-          </button>
-        </div>
-      </header>
-
       <div className="dashboard-content">
         {isLoading ? (
           <section className="dashboard-state" aria-live="polite">

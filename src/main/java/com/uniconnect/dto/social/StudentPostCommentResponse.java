@@ -9,5 +9,5 @@ public record StudentPostCommentResponse(
         String content,
         Instant createdAt,
         Instant updatedAt,
-        StudentSummaryResponse author) {
+        PostAuthorResponse author) {
 }

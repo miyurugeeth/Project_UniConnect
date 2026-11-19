@@ -72,6 +72,86 @@
   font-size: 13px;
 }
 
+.social-welcome {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 29px 30px;
+  border-radius: 14px;
+  background: linear-gradient(120deg, var(--navy-dark), var(--navy));
+}
+
+.social-welcome h1 {
+  max-width: 700px;
+  color: #fff;
+}
+
+.social-welcome > div > p:last-child {
+  margin: 9px 0 0;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.social-welcome__create {
+  flex: 0 0 auto;
+  color: var(--navy-dark);
+  border-color: var(--gold);
+  background: var(--gold);
+}
+
+.social-welcome__create:hover:not(:disabled) {
+  color: var(--navy-dark);
+  border-color: #d7ad5b;
+  background: #d7ad5b;
+}
+
+.social-member-summary {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.social-member-summary__avatar {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  flex: 0 0 52px;
+  place-items: center;
+  color: #fff;
+  border-radius: 50%;
+  background: var(--navy);
+  font-size: 16px;
+  font-weight: 750;
+  object-fit: cover;
+}
+
+.social-member-summary__details {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 4px;
+}
+
+.social-member-summary__details strong {
+  color: var(--text-dark);
+  font-size: 14px;
+}
+
+.social-member-summary__details > span {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 11px;
+  text-overflow: ellipsis;
+}
+
+.social-member-summary__label {
+  margin: 0;
+  color: var(--gold);
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 1.1px;
+}
+
 .social-card {
   padding: 22px;
   border: 1px solid var(--border-soft);
@@ -87,9 +167,70 @@
   font-size: 16px;
 }
 
+.social-search h1 {
+  margin: 0 0 12px;
+  color: var(--text-dark);
+  font-size: clamp(24px, 3vw, 30px);
+  letter-spacing: -0.6px;
+}
+
 .social-composer form {
   display: grid;
   gap: 9px;
+}
+
+.social-modal-backdrop {
+  position: fixed;
+  z-index: 50;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgb(16 42 70 / 60%);
+}
+
+.social-composer-dialog {
+  width: min(100%, 680px);
+  max-height: min(90vh, 880px);
+  overflow: auto;
+}
+
+.social-composer__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.social-composer__heading h2 {
+  margin-bottom: 12px;
+}
+
+.social-composer__close {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  place-items: center;
+  color: var(--text-muted);
+  border: 1px solid var(--border-input);
+  border-radius: 50%;
+  background: var(--surface);
+  font: inherit;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.social-composer__close:hover:not(:disabled) {
+  color: var(--text-dark);
+  background: var(--input-bg);
+}
+
+.social-connections__description {
+  margin: -5px 0 18px;
+  color: var(--text-muted);
+  font-size: 13px;
 }
 
 .social-label {
@@ -219,6 +360,30 @@
   margin: 4px 0 0;
 }
 
+.social-feed__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.social-feed__title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.social-feed__heading h2 {
+  margin: 4px 0 0;
+  color: var(--navy);
+  font-size: 16px;
+}
+
+.social-feed__count {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
 .social-post-list {
   display: grid;
   gap: 14px;
@@ -229,12 +394,19 @@
   gap: 4px;
 }
 
-.social-post__author a {
+.social-post__author a,
+.social-post__author strong {
   width: fit-content;
   color: var(--navy);
   font-size: 14px;
   font-weight: 700;
   text-decoration: none;
+}
+
+.social-post__author .social-post__role {
+  color: var(--gold);
+  font-size: 9px;
+  font-weight: 700;
 }
 
 .social-post__author span,
@@ -249,7 +421,7 @@
   padding: 5px 9px;
   color: var(--navy);
   border-radius: 999px;
-  background: #edf3f8;
+  background: var(--hover-bg);
   font-size: 10px;
   font-weight: 650;
 }
@@ -300,7 +472,7 @@
   justify-items: start;
   gap: 7px;
   padding: 10px;
-  border: 1px solid #eef0f2;
+  border: 1px solid var(--border-soft);
   border-radius: 9px;
 }
 
@@ -310,7 +482,7 @@
   gap: 18px;
   margin-top: 16px;
   padding-top: 13px;
-  border-top: 1px solid #eef0f2;
+  border-top: 1px solid var(--border-soft);
 }
 
 .social-text-button--liked {
@@ -331,7 +503,7 @@
   gap: 12px;
   margin-top: 15px;
   padding-top: 13px;
-  border-top: 1px solid #eef0f2;
+  border-top: 1px solid var(--border-soft);
 }
 
 .social-comment-list {
@@ -342,7 +514,7 @@
 .social-comment {
   padding: 11px 12px;
   border-radius: 9px;
-  background: #f8f9fa;
+  background: var(--hover-bg);
 }
 
 .social-comment__heading {
@@ -354,20 +526,20 @@
 }
 
 .social-comment__heading a {
-  color: #17365d;
+  color: var(--navy);
   font-size: 11px;
   font-weight: 700;
   text-decoration: none;
 }
 
 .social-comment__heading time {
-  color: #8993a0;
+  color: var(--text-muted);
   font-size: 10px;
 }
 
 .social-comment > p {
   margin: 8px 0 0;
-  color: #34445a;
+  color: var(--text);
   font-size: 12px;
   line-height: 1.5;
   white-space: pre-wrap;
@@ -379,10 +551,10 @@
   width: 100%;
   min-height: 68px;
   padding: 9px 10px;
-  color: #26364a;
-  border: 1px solid #dfe4ea;
+  color: var(--input-text);
+  border: 1px solid var(--border-input);
   border-radius: 8px;
-  background: #fff;
+  background: var(--input-bg);
   font: inherit;
   font-size: 12px;
   resize: vertical;
@@ -510,7 +682,7 @@
   gap: 8px;
   margin-top: 20px;
   padding-top: 18px;
-  border-top: 1px solid #eef0f2;
+  border-top: 1px solid var(--border-soft);
 }
 
 .student-profile-connections h2 {
@@ -553,8 +725,27 @@
     padding-top: 28px;
   }
 
+  .social-welcome {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 23px 20px;
+  }
+
+  .social-welcome__create {
+    width: 100%;
+  }
+
   .social-card {
     padding: 17px;
+  }
+
+  .social-member-summary {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .social-member-summary__details {
+    width: calc(100% - 70px);
   }
 
   .social-search-form {
@@ -564,6 +755,17 @@
 
   .social-pagination {
     gap: 8px;
+  }
+
+  .social-modal-backdrop {
+    align-items: end;
+    padding: 0;
+  }
+
+  .social-composer-dialog {
+    width: 100%;
+    max-height: 92vh;
+    border-radius: 16px 16px 0 0;
   }
 
   .social-pagination .social-button {

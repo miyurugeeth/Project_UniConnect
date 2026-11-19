@@ -16,11 +16,11 @@ import org.springframework.data.repository.query.Param;
 public interface StudentPostCommentRepository
         extends JpaRepository<StudentPostComment, UUID> {
 
-    @EntityGraph(attributePaths = {"author", "author.user"})
+    @EntityGraph(attributePaths = {"author", "author.role"})
     Page<StudentPostComment> findAllByPost_IdOrderByCreatedAtAscIdAsc(
             UUID postId, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"author", "author.user"})
+    @EntityGraph(attributePaths = {"author", "author.role"})
     Optional<StudentPostComment> findWithAuthorByIdAndPost_Id(UUID commentId, UUID postId);
 
     long countByPost_Id(UUID postId);

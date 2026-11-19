@@ -1,9 +1,9 @@
-import { Navigate } from 'react-router-dom'
+import { Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from '../context/useAuth'
 
 const dashboardPaths = {
-  STUDENT: '/student/dashboard',
-  PROFESSIONAL: '/professional/dashboard',
+  STUDENT: '/student/feed',
+  PROFESSIONAL: '/student/feed',
   ADMIN: '/admin/dashboard',
 }
 
@@ -18,7 +18,7 @@ function ProtectedRoute({ allowedRoles, children }) {
     return <Navigate to={dashboardPaths[user.role] || '/login'} replace />
   }
 
-  return children
+  return children || <Outlet />
 }
 
 export default ProtectedRoute
