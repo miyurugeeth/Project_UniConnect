@@ -125,7 +125,7 @@ class StudentPostDeleteJpaTest {
         StudentPost post = postRepository.findWithAuthorById(fixture.postId()).orElseThrow();
         StudentPostLike like =
                 likeRepository
-                        .findByPost_IdAndStudent_Id(fixture.postId(), fixture.studentId())
+                        .findByPost_IdAndActor_Id(fixture.postId(), fixture.studentId())
                         .orElseThrow();
         assertThat(entityManager.contains(like)).isTrue();
 

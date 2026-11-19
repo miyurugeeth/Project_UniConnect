@@ -13,9 +13,9 @@ import org.springframework.data.repository.query.Param;
 
 public interface StudentPostLikeRepository extends JpaRepository<StudentPostLike, UUID> {
 
-    boolean existsByPost_IdAndStudent_Id(UUID postId, UUID studentId);
+    boolean existsByPost_IdAndActor_Id(UUID postId, UUID actorId);
 
-    Optional<StudentPostLike> findByPost_IdAndStudent_Id(UUID postId, UUID studentId);
+    Optional<StudentPostLike> findByPost_IdAndActor_Id(UUID postId, UUID actorId);
 
     long countByPost_Id(UUID postId);
 
@@ -26,7 +26,7 @@ public interface StudentPostLikeRepository extends JpaRepository<StudentPostLike
 
     @Query(
             "select l.post.id from StudentPostLike l "
-                    + "where l.post.id in :postIds and l.student.id = :studentId")
+                    + "where l.post.id in :postIds and l.actor.id = :studentId")
     Set<UUID> findLikedPostIds(
             @Param("postIds") Collection<UUID> postIds, @Param("studentId") UUID studentId);
 }

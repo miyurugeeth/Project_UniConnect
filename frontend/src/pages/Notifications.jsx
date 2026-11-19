@@ -97,9 +97,9 @@ function Notifications() {
   return (
     <main className="notifications-page">
       <header className="notifications-header">
-        <Link className="notifications-back" to="/student/dashboard" aria-label="Back to dashboard">
+        <Link className="notifications-back" to="/student/feed" aria-label="Back to feed">
           <ArrowLeft size={16} aria-hidden="true" />
-          Dashboard
+          Home
         </Link>
         <h1>Notifications</h1>
         {unreadCount > 0 && (
@@ -126,12 +126,10 @@ function Notifications() {
         </section>
       ) : (
         <section className="notifications-list" aria-label="Notifications">
-          {notifications.map((notification) => {
-            const isDismissing = dismissTimeouts.has(notification.id)
-            return (
+          {notifications.map((notification) => (
               <article
                 key={notification.id}
-                className={`notification-item ${notification.isRead ? 'notification-item--read' : 'notification-item--unread'} ${isDismissing ? 'notification-item--dismissing' : ''}`}
+                className={`notification-item ${notification.isRead ? 'notification-item--read' : 'notification-item--unread'}`}
                 onClick={() => handleNotificationClick(notification)}
                 role="button"
                 tabIndex={0}
@@ -195,8 +193,7 @@ function Notifications() {
                   </button>
                 </div>
               </article>
-            )
-          })}
+          ))}
         </section>
       )}
     </main>

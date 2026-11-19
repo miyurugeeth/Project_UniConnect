@@ -2,6 +2,7 @@ package com.uniconnect.service;
 
 import com.uniconnect.config.SocialMediaProperties;
 import com.uniconnect.dto.social.PostAttachmentResponse;
+import com.uniconnect.dto.social.PostAuthorResponse;
 import com.uniconnect.dto.social.PostCommentAggregate;
 import com.uniconnect.dto.social.PostCategoryResponse;
 import com.uniconnect.dto.social.PostLikeAggregate;
@@ -23,6 +24,8 @@ import com.uniconnect.entity.StudentPostComment;
 import com.uniconnect.entity.StudentPostLike;
 import com.uniconnect.entity.StudentFollow;
 import com.uniconnect.entity.StudentProfile;
+import com.uniconnect.entity.ProfessionalProfile;
+import com.uniconnect.entity.User;
 import com.uniconnect.entity.NotificationType;
 import com.uniconnect.exception.ProfileNotFoundException;
 import com.uniconnect.repository.PostCategoryRepository;
@@ -31,6 +34,7 @@ import com.uniconnect.repository.StudentPostCommentRepository;
 import com.uniconnect.repository.StudentPostLikeRepository;
 import com.uniconnect.repository.StudentPostRepository;
 import com.uniconnect.repository.StudentProfileRepository;
+import com.uniconnect.repository.ProfessionalProfileRepository;
 import com.uniconnect.repository.StudentFollowRepository;
 import com.uniconnect.service.NotificationService;
 import java.io.IOException;
@@ -67,6 +71,7 @@ public class StudentSocialService {
     private static final int MAX_PAGE_SIZE = 50;
 
     private final StudentProfileRepository studentProfileRepository;
+    private final ProfessionalProfileRepository professionalProfileRepository;
     private final StudentPostRepository studentPostRepository;
     private final PostCategoryRepository postCategoryRepository;
     private final StudentPostAttachmentRepository attachmentRepository;
@@ -79,6 +84,7 @@ public class StudentSocialService {
 
     public StudentSocialService(
             StudentProfileRepository studentProfileRepository,
+            ProfessionalProfileRepository professionalProfileRepository,
             StudentPostRepository studentPostRepository,
             PostCategoryRepository postCategoryRepository,
             StudentPostAttachmentRepository attachmentRepository,
@@ -89,6 +95,7 @@ public class StudentSocialService {
             SocialMediaProperties mediaProperties,
             NotificationService notificationService) {
         this.studentProfileRepository = studentProfileRepository;
+        this.professionalProfileRepository = professionalProfileRepository;
         this.studentPostRepository = studentPostRepository;
         this.postCategoryRepository = postCategoryRepository;
         this.attachmentRepository = attachmentRepository;
@@ -238,6 +245,12 @@ public class StudentSocialService {
     @Transactional(readOnly = true)
     public Page<StudentPostResponse> getFeed(
             UUID currentStudentId, int page, int size, String categoryCode) {
+        return getFeed(currentStudentId, page, size, categoryCode, false);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<StudentPostResponse> getFeed(
+            UUID currentStudentId, int page, int size, String categoryCode, boolean mine) {
         Pageable pageable =
                 pageRequest(
                         page,
@@ -248,8 +261,15 @@ public class StudentSocialService {
                 categoryCode == null || categoryCode.isBlank() ? null : categoryCode.trim();
 
         Page<StudentPost> posts;
-        if (normalizedCategoryCode == null) {
+        if (normalizedCategoryCode == null && !mine) {
             posts = studentPostRepository.findAll(pageable);
+        } else if (normalizedCategoryCode == null) {
+            posts = studentPostRepository.findAllByAuthor_Id(currentStudentId, pageable);
+        } else if (mine) {
+            PostCategory category = requireActiveCategory(normalizedCategoryCode);
+            posts =
+                    studentPostRepository.findAllByAuthor_IdAndCategory_Code(
+                            currentStudentId, category.getCode(), pageable);
         } else {
             PostCategory category = requireActiveCategory(normalizedCategoryCode);
             posts =
@@ -261,7 +281,7 @@ public class StudentSocialService {
 
     @Transactional
     public StudentPostResponse createPost(UUID currentStudentId, StudentPostRequest request) {
-        StudentProfile author = requireStudentProfile(currentStudentId);
+        User author = requireSocialUser(currentStudentId);
         PostCategory category = requireActiveCategory(request.categoryCode());
         StudentPost post =
                 studentPostRepository.save(
@@ -278,7 +298,7 @@ public class StudentSocialService {
             UUID currentStudentId,
             StudentPostRequest request,
             List<MultipartFile> attachments) {
-        StudentProfile author = requireStudentProfile(currentStudentId);
+        User author = requireSocialUser(currentStudentId);
         PostCategory category = requireActiveCategory(request.categoryCode());
         StudentPost post =
                 studentPostRepository.save(
@@ -380,23 +400,23 @@ public class StudentSocialService {
 
     @Transactional
     public PostLikeResponse likePost(UUID currentStudentId, UUID postId) {
-        StudentProfile student = requireStudentProfile(currentStudentId);
+        User actor = requireSocialUser(currentStudentId);
         StudentPost post = requirePost(postId);
         boolean alreadyLiked =
-                likeRepository.existsByPost_IdAndStudent_Id(postId, currentStudentId);
+                likeRepository.existsByPost_IdAndActor_Id(postId, currentStudentId);
         if (!alreadyLiked) {
             try {
-                likeRepository.saveAndFlush(new StudentPostLike(post, student));
+                likeRepository.saveAndFlush(new StudentPostLike(post, actor));
             } catch (DataIntegrityViolationException exception) {
                 throw new ResponseStatusException(
-                        HttpStatus.CONFLICT, "The post is already liked by this student.");
+                        HttpStatus.CONFLICT, "The post is already liked by this user.");
             }
-            if (!post.getAuthor().getId().equals(student.getId())) {
+            if (!post.getAuthor().getId().equals(actor.getId())) {
                 notificationService.createNotification(
-                        post.getAuthor().getUser().getId(),
-                        student.getUser().getId(),
+                        post.getAuthor().getId(),
+                        actor.getId(),
                         NotificationType.POST_LIKE,
-                        student.getUser().getFullName() + " liked your post.",
+                        actor.getFullName() + " liked your post.",
                         "/student/feed");
             }
         }
@@ -405,10 +425,10 @@ public class StudentSocialService {
 
     @Transactional
     public PostLikeResponse unlikePost(UUID currentStudentId, UUID postId) {
-        requireStudentProfile(currentStudentId);
+        requireSocialUser(currentStudentId);
         requirePost(postId);
         likeRepository
-                .findByPost_IdAndStudent_Id(postId, currentStudentId)
+                .findByPost_IdAndActor_Id(postId, currentStudentId)
                 .ifPresent(likeRepository::delete);
         return new PostLikeResponse(likeRepository.countByPost_Id(postId), false);
     }
@@ -419,23 +439,23 @@ public class StudentSocialService {
         Pageable pageable = pageRequest(page, size, Sort.unsorted());
         return commentRepository
                 .findAllByPost_IdOrderByCreatedAtAscIdAsc(postId, pageable)
-                .map(StudentSocialService::toCommentResponse);
+                .map(this::toCommentResponse);
     }
 
     @Transactional
     public StudentPostCommentResponse createComment(
             UUID currentStudentId, UUID postId, StudentPostCommentRequest request) {
-        StudentProfile author = requireStudentProfile(currentStudentId);
+        User author = requireSocialUser(currentStudentId);
         StudentPost post = requirePost(postId);
         StudentPostComment comment =
                 commentRepository.save(
                         new StudentPostComment(post, author, request.content().trim()));
         if (!post.getAuthor().getId().equals(author.getId())) {
             notificationService.createNotification(
-                    post.getAuthor().getUser().getId(),
-                    author.getUser().getId(),
+                    post.getAuthor().getId(),
+                    author.getId(),
                     NotificationType.POST_COMMENT,
-                    author.getUser().getFullName() + " commented on your post.",
+                    author.getFullName() + " commented on your post.",
                     "/student/feed");
         }
         return toCommentResponse(comment);
@@ -554,12 +574,12 @@ public class StudentSocialService {
                         .map(StudentSocialService::toAttachmentResponse)
                         .toList();
         long likeCount = likeRepository.countByPost_Id(post.getId());
-        boolean liked = likeRepository.existsByPost_IdAndStudent_Id(post.getId(), currentStudentId);
+        boolean liked = likeRepository.existsByPost_IdAndActor_Id(post.getId(), currentStudentId);
         long commentCount = commentRepository.countByPost_Id(post.getId());
         return toPostResponse(post, attachments, likeCount, liked, commentCount);
     }
 
-    private static StudentPostResponse toPostResponse(
+    private StudentPostResponse toPostResponse(
             StudentPost post,
             List<PostAttachmentResponse> attachments,
             long likeCount,
@@ -571,7 +591,7 @@ public class StudentSocialService {
                 post.getImageUrl(),
                 post.getCreatedAt(),
                 post.getUpdatedAt(),
-                toSummaryResponse(post.getAuthor()),
+                toPostAuthorResponse(post.getAuthor()),
                 toCategoryResponse(post.getCategory()),
                 List.copyOf(attachments),
                 likeCount,
@@ -612,6 +632,20 @@ public class StudentSocialService {
         return studentProfileRepository
                 .findWithUserById(studentId)
                 .orElseThrow(() -> new ProfileNotFoundException(RoleCode.STUDENT));
+    }
+
+    private User requireSocialUser(UUID userId) {
+        return studentProfileRepository
+                .findWithUserById(userId)
+                .map(StudentProfile::getUser)
+                .filter(user -> user.getRole().getCode() == RoleCode.STUDENT)
+                .or(() -> professionalProfileRepository.findWithUserById(userId)
+                        .map(ProfessionalProfile::getUser)
+                        .filter(user -> user.getRole().getCode() == RoleCode.PROFESSIONAL))
+                .orElseThrow(
+                        () ->
+                                new AccessDeniedException(
+                                        "Only student and professional users can use the shared feed."));
     }
 
     private PostCategory requireActiveCategory(String categoryCode) {
@@ -727,14 +761,37 @@ public class StudentSocialService {
         return new PostCategoryResponse(category.getCode(), category.getDisplayName());
     }
 
-    private static StudentPostCommentResponse toCommentResponse(StudentPostComment comment) {
+    private StudentPostCommentResponse toCommentResponse(StudentPostComment comment) {
         return new StudentPostCommentResponse(
                 comment.getId(),
                 comment.getPost().getId(),
                 comment.getContent(),
                 comment.getCreatedAt(),
                 comment.getUpdatedAt(),
-                toSummaryResponse(comment.getAuthor()));
+                toPostAuthorResponse(comment.getAuthor()));
+    }
+
+    private PostAuthorResponse toPostAuthorResponse(User user) {
+        String role = user.getRole().getCode().name();
+        StudentProfile studentProfile =
+                RoleCode.STUDENT.name().equals(role)
+                        ? studentProfileRepository.findById(user.getId()).orElse(null)
+                        : null;
+        ProfessionalProfile professionalProfile =
+                RoleCode.PROFESSIONAL.name().equals(role)
+                        ? professionalProfileRepository.findById(user.getId()).orElse(null)
+                        : null;
+        return new PostAuthorResponse(
+                user.getId(),
+                user.getFullName(),
+                user.getProfileImageUrl(),
+                role,
+                studentProfile == null ? null : studentProfile.getUniversityName(),
+                studentProfile == null ? null : studentProfile.getFaculty(),
+                studentProfile == null ? null : studentProfile.getDepartmentOrField(),
+                professionalProfile == null ? null : professionalProfile.getCompanyName(),
+                professionalProfile == null ? null : professionalProfile.getIndustry(),
+                professionalProfile == null ? null : professionalProfile.getJobPosition());
     }
 
     public record MediaFileContent(Resource resource, String contentType, long fileSizeBytes) {

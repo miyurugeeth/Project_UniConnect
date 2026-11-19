@@ -113,8 +113,12 @@ public class StudentSocialController {
             @AuthenticationPrincipal Jwt principal,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(required = false) String category) {
-        return studentSocialService.getFeed(currentStudentId(principal), page, size, category);
+            @RequestParam(required = false) String category,
+            @RequestParam(defaultValue = "false") boolean mine) {
+        UUID userId = currentStudentId(principal);
+        return mine
+                ? studentSocialService.getFeed(userId, page, size, category, true)
+                : studentSocialService.getFeed(userId, page, size, category);
     }
 
     @PostMapping("/posts")

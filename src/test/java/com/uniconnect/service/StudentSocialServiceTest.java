@@ -24,6 +24,7 @@ import com.uniconnect.dto.social.StudentFollowResponse;
 import com.uniconnect.dto.notification.NotificationResponse;
 import com.uniconnect.entity.PostCategory;
 import com.uniconnect.entity.PostMediaType;
+import com.uniconnect.entity.ProfessionalProfile;
 import com.uniconnect.entity.FollowStatus;
 import com.uniconnect.entity.NotificationType;
 import com.uniconnect.entity.Role;
@@ -43,6 +44,7 @@ import com.uniconnect.repository.StudentPostLikeRepository;
 import com.uniconnect.repository.PostCategoryRepository;
 import com.uniconnect.repository.StudentPostRepository;
 import com.uniconnect.repository.StudentProfileRepository;
+import com.uniconnect.repository.ProfessionalProfileRepository;
 import com.uniconnect.repository.StudentFollowRepository;
 import com.uniconnect.service.NotificationService;
 import java.io.IOException;
@@ -73,6 +75,7 @@ import org.springframework.web.server.ResponseStatusException;
 class StudentSocialServiceTest {
 
     @Mock private StudentProfileRepository studentProfileRepository;
+    @Mock private ProfessionalProfileRepository professionalProfileRepository;
     @Mock private StudentPostRepository studentPostRepository;
     @Mock private PostCategoryRepository postCategoryRepository;
     @Mock private StudentPostAttachmentRepository attachmentRepository;
@@ -89,6 +92,7 @@ class StudentSocialServiceTest {
         studentSocialService =
                 new StudentSocialService(
                         studentProfileRepository,
+                        professionalProfileRepository,
                         studentPostRepository,
                         postCategoryRepository,
                         attachmentRepository,
@@ -345,7 +349,7 @@ class StudentSocialServiceTest {
         when(studentProfileRepository.findWithUserById(studentId))
                 .thenReturn(Optional.of(student));
         when(studentPostRepository.findWithAuthorById(postId)).thenReturn(Optional.of(post));
-        when(likeRepository.existsByPost_IdAndStudent_Id(postId, studentId))
+        when(likeRepository.existsByPost_IdAndActor_Id(postId, studentId))
                 .thenReturn(false, true);
         when(likeRepository.countByPost_Id(postId)).thenReturn(1L);
 
@@ -359,8 +363,64 @@ class StudentSocialServiceTest {
         ArgumentCaptor<StudentPostLike> likeCaptor =
                 ArgumentCaptor.forClass(StudentPostLike.class);
         verify(likeRepository).saveAndFlush(likeCaptor.capture());
-        assertEquals(studentId, likeCaptor.getValue().getStudent().getId());
+        assertEquals(studentId, likeCaptor.getValue().getActor().getId());
         assertEquals(postId, likeCaptor.getValue().getPost().getId());
+    }
+
+    @Test
+    void professionalsCanPublishAndLikePostsInTheSharedFeed() {
+        UUID professionalId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+        User professional =
+                new User(
+                        "A Professional",
+                        "professional@example.lk",
+                        "not-a-real-password-hash",
+                        new Role(RoleCode.PROFESSIONAL));
+        ReflectionTestUtils.setField(professional, "id", professionalId);
+        ProfessionalProfile profile =
+                new ProfessionalProfile(professional, "Example Company", "Technology", "Engineer");
+        ReflectionTestUtils.setField(profile, "id", professionalId);
+        PostCategory category = generalCategory();
+        StudentPost post = new StudentPost(professional, "Professional update", null, category);
+
+        when(professionalProfileRepository.findWithUserById(professionalId))
+                .thenReturn(Optional.of(profile));
+        when(professionalProfileRepository.findById(professionalId))
+                .thenReturn(Optional.of(profile));
+        when(postCategoryRepository.findByCodeAndActiveTrue(category.getCode()))
+                .thenReturn(Optional.of(category));
+        when(studentPostRepository.save(any(StudentPost.class)))
+                .thenAnswer(
+                        invocation -> {
+                            StudentPost savedPost = invocation.getArgument(0);
+                            preparePost(savedPost, postId);
+                            return savedPost;
+                        });
+        when(attachmentRepository.findAllByPost_IdOrderByCreatedAtAscIdAsc(postId))
+                .thenReturn(List.of());
+        when(likeRepository.existsByPost_IdAndActor_Id(postId, professionalId))
+                .thenReturn(false);
+        when(likeRepository.countByPost_Id(postId)).thenReturn(1L);
+        when(commentRepository.countByPost_Id(postId)).thenReturn(0L);
+        when(studentPostRepository.findWithAuthorById(postId)).thenReturn(Optional.of(post));
+
+        StudentPostResponse created =
+                studentSocialService.createPost(
+                        professionalId,
+                        new StudentPostRequest(
+                                "Professional update", null, category.getCode()));
+        PostLikeResponse liked = studentSocialService.likePost(professionalId, postId);
+
+        assertEquals("PROFESSIONAL", created.author().role());
+        assertEquals("Example Company", created.author().companyName());
+        assertEquals("Professional update", created.content());
+        assertTrue(liked.likedByCurrentUser());
+
+        ArgumentCaptor<StudentPostLike> likeCaptor =
+                ArgumentCaptor.forClass(StudentPostLike.class);
+        verify(likeRepository).saveAndFlush(likeCaptor.capture());
+        assertEquals(professionalId, likeCaptor.getValue().getActor().getId());
     }
 
     @Test

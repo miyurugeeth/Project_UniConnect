@@ -10,7 +10,7 @@ public record StudentPostResponse(
         String imageUrl,
         Instant createdAt,
         Instant updatedAt,
-        StudentSummaryResponse author,
+        PostAuthorResponse author,
         PostCategoryResponse category,
         List<PostAttachmentResponse> attachments,
         long likeCount,

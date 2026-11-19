@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api } from '../services/api'
 import { useAuth } from '../context/useAuth'
-import ThemeToggle from '../components/ThemeToggle'
-import NotificationBell from '../components/NotificationBell'
 import './SocialNetworking.css'
 
 function StudentProfile() {
@@ -93,15 +91,6 @@ function StudentProfile() {
 
   return (
     <main className="social-page">
-      <header className="social-header">
-        <Link className="social-brand" to="/student/feed">
-          Uni<span>Connect</span>
-        </Link>
-        <Link className="social-back-link" to="/student/feed">
-          Back to feed
-        </Link>
-        <ThemeToggle />
-      </header>
       <div className="social-content social-profile-content">
         {isLoading ? (
           <p className="social-empty" aria-live="polite">Loading student profile…</p>

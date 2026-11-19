@@ -42,8 +42,8 @@ public class StudentPostComment {
     @JoinColumn(
             name = "author_user_id",
             nullable = false,
-            foreignKey = @ForeignKey(name = "fk_student_post_comments_authors"))
-    private StudentProfile author;
+            foreignKey = @ForeignKey(name = "fk_student_post_comments_users"))
+    private User author;
 
     @NotBlank
     @Size(max = 2000)
@@ -64,10 +64,14 @@ public class StudentPostComment {
     protected StudentPostComment() {
     }
 
-    public StudentPostComment(StudentPost post, StudentProfile author, String content) {
+    public StudentPostComment(StudentPost post, User author, String content) {
         this.post = post;
         this.author = author;
         this.content = content;
+    }
+
+    public StudentPostComment(StudentPost post, StudentProfile author, String content) {
+        this(post, author.getUser(), content);
     }
 
     @PrePersist
@@ -90,7 +94,7 @@ public class StudentPostComment {
         return post;
     }
 
-    public StudentProfile getAuthor() {
+    public User getAuthor() {
         return author;
     }
 

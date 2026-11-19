@@ -16,8 +16,17 @@ vi.mock('../services/api', () => ({
   },
 }))
 
+const authState = vi.hoisted(() => ({
+  user: {
+    userId: 'student-1',
+    role: 'STUDENT',
+    fullName: 'Current Student',
+    email: 'student@example.lk',
+  },
+}))
+
 vi.mock('../context/useAuth', () => ({
-  useAuth: () => ({ user: { userId: 'student-1', fullName: 'Current Student' } }),
+  useAuth: () => authState,
 }))
 
 const firstPage = {
@@ -38,6 +47,7 @@ const firstPage = {
       author: {
         id: 'student-1',
         fullName: 'Current Student',
+        role: 'STUDENT',
         universityName: 'Example University',
         faculty: 'Science',
       },
@@ -67,6 +77,12 @@ afterEach(() => {
 describe('StudentSocialFeed', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    authState.user = {
+      userId: 'student-1',
+      role: 'STUDENT',
+      fullName: 'Current Student',
+      email: 'student@example.lk',
+    }
     scrollIntoViewDescriptor = Object.getOwnPropertyDescriptor(
       HTMLElement.prototype,
       'scrollIntoView',
@@ -80,6 +96,24 @@ describe('StudentSocialFeed', () => {
       value: vi.fn(),
     })
     api.get.mockImplementation((url) => {
+      if (url === '/api/users/me') {
+        return Promise.resolve({
+          data: {
+            userId: authState.user.userId,
+            role: authState.user.role,
+            fullName: authState.user.fullName,
+            email: authState.user.email,
+            studentProfile:
+              authState.user.role === 'STUDENT'
+                ? { universityName: 'Example University', faculty: 'Science' }
+                : null,
+            professionalProfile:
+              authState.user.role === 'PROFESSIONAL'
+                ? { companyName: 'Example Company', jobPosition: 'Engineer' }
+                : null,
+          },
+        })
+      }
       if (url === '/api/students/categories') {
         return Promise.resolve({ data: categories })
       }
@@ -155,6 +189,52 @@ describe('StudentSocialFeed', () => {
     expect(screen.getByRole('button', { name: 'Delete' })).toBeTruthy()
   })
 
+  it('uses the shared feed for a professional account', async () => {
+    authState.user = {
+      userId: 'professional-1',
+      role: 'PROFESSIONAL',
+      fullName: 'Current Professional',
+      email: 'professional@example.lk',
+    }
+    render(
+      <MemoryRouter>
+        <ThemeProvider>
+          <NotificationProvider>
+            <StudentSocialFeed />
+          </NotificationProvider>
+        </ThemeProvider>
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('My first update')).toBeTruthy()
+    expect(screen.getByText('Current Professional')).toBeTruthy()
+    expect(api.get).toHaveBeenCalledWith(
+      '/api/students/feed',
+      expect.objectContaining({
+        params: expect.objectContaining({ page: 0, size: 10 }),
+      }),
+    )
+  })
+
+  it('keeps the home view focused on posts and opens the composer on demand', async () => {
+    render(
+      <MemoryRouter>
+        <ThemeProvider>
+          <NotificationProvider>
+            <StudentSocialFeed />
+          </NotificationProvider>
+        </ThemeProvider>
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByRole('heading', { name: 'Latest Posts' })).toBeTruthy()
+    expect(screen.queryByRole('heading', { name: 'Create a post' })).toBeNull()
+    expect(screen.queryByLabelText('Search students')).toBeNull()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Create post' }))
+    expect(await screen.findByRole('heading', { name: 'Create a post' })).toBeTruthy()
+  })
+
   it('loads category choices and offers an all-categories filter', async () => {
     render(
       <MemoryRouter>
@@ -166,6 +246,8 @@ describe('StudentSocialFeed', () => {
       </MemoryRouter>,
     )
 
+    expect(screen.queryByRole('heading', { name: 'Create a post' })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Create post' }))
     expect(
       await within(screen.getByLabelText('Post category')).findByRole('option', {
         name: 'ICT and Computing',
@@ -193,6 +275,7 @@ describe('StudentSocialFeed', () => {
       </MemoryRouter>,
     )
 
+    fireEvent.click(screen.getByRole('button', { name: 'Create post' }))
     fireEvent.change(await screen.findByLabelText('Post text'), {
       target: { value: 'A new update' },
     })
@@ -348,11 +431,13 @@ describe('StudentSocialFeed', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
 
-    expect(await screen.findByRole('heading', { name: 'Create a post' })).toBeTruthy()
-    expect(screen.queryByRole('button', { name: 'Cancel edit' })).toBeNull()
     await waitFor(() => {
+      expect(screen.queryByRole('dialog')).toBeNull()
       expect(api.delete).toHaveBeenCalledWith('/api/students/posts/post-1')
     })
+    expect(screen.queryByRole('heading', { name: 'Create a post' })).toBeNull()
+    expect(screen.getByRole('button', { name: 'Create post' })).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Cancel edit' })).toBeNull()
   })
 
   it('moves to the previous feed page after deleting its only post', async () => {
@@ -484,7 +569,7 @@ describe('StudentSocialFeed', () => {
 
   it('submits student search and links results to student profiles', async () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter initialEntries={['/student/feed?view=connections']}>
         <ThemeProvider>
           <NotificationProvider>
           <StudentSocialFeed />
@@ -567,6 +652,7 @@ describe('StudentSocialFeed', () => {
       </MemoryRouter>,
     )
 
+    fireEvent.click(screen.getByRole('button', { name: 'Create post' }))
     const file = new File(['image'], 'photo.png', { type: 'image/png' })
     fireEvent.change(await screen.findByLabelText('Photos or video'), {
       target: { files: [file] },
@@ -589,6 +675,7 @@ describe('StudentSocialFeed', () => {
       </MemoryRouter>,
     )
 
+    fireEvent.click(screen.getByRole('button', { name: 'Create post' }))
     fireEvent.change(await screen.findByLabelText('Post text'), {
       target: { value: 'A photo update' },
     })
@@ -656,7 +743,7 @@ describe('StudentSocialFeed', () => {
 
     expect(await screen.findByRole('button', { name: 'Unlike · 3' })).toBeTruthy()
     expect(api.post).toHaveBeenCalledWith('/api/students/posts/post-1/likes')
-    expect(api.get).toHaveBeenCalledTimes(4)
+    expect(api.get).toHaveBeenCalledTimes(5)
   })
 
   it('loads comments and supports editing and deleting the current student’s comments', async () => {

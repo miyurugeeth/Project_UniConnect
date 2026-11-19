@@ -1,47 +1,13 @@
-import { GraduationCap, LogOut, MessageSquareText, Sparkles } from 'lucide-react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Sparkles } from 'lucide-react'
 import { useAuth } from '../context/useAuth'
-import ThemeToggle from '../components/ThemeToggle'
-import NotificationBell from '../components/NotificationBell'
 import './Dashboard.css'
 
 function RoleDashboard({ role }) {
-  const { logout, user } = useAuth()
-  const navigate = useNavigate()
+  const { user } = useAuth()
   const isProfessional = role === 'PROFESSIONAL'
-
-  function handleLogout() {
-    logout()
-    navigate('/login', { replace: true })
-  }
 
   return (
     <main className="dashboard-page">
-      <header className="dashboard-header">
-        <a className="dashboard-brand" href="/" aria-label="UniConnect home">
-          <span className="dashboard-brand__icon">
-            <GraduationCap size={22} aria-hidden="true" />
-          </span>
-          <span>
-            Uni<span>Connect</span>
-          </span>
-        </a>
-        <div className="dashboard-header__actions">
-          <Link className="dashboard-logout" to="/messages" aria-label="Messages">
-            <MessageSquareText size={16} aria-hidden="true" />
-            <span>Messages</span>
-          </Link>
-          <span className="dashboard-role">
-            {isProfessional ? 'Professional space' : 'Admin space'}
-          </span>
-          <ThemeToggle />
-          <NotificationBell />
-          <button className="dashboard-logout" type="button" onClick={handleLogout}>
-            <LogOut size={16} aria-hidden="true" />
-            <span>Log out</span>
-          </button>
-        </div>
-      </header>
       <section className="role-placeholder">
         <span className="role-placeholder__icon">
           <Sparkles size={24} aria-hidden="true" />
