@@ -11,6 +11,7 @@ import com.uniconnect.dto.social.StudentProfileResponse;
 import com.uniconnect.dto.social.StudentSummaryResponse;
 import com.uniconnect.service.StudentSocialService;
 import com.uniconnect.service.StudentSocialService.MediaFileContent;
+import com.uniconnect.service.StudentSocialService.StoredMedia;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -57,6 +58,59 @@ public class StudentSocialController {
     public StudentProfileResponse getStudentProfile(
             @AuthenticationPrincipal Jwt principal, @PathVariable UUID studentId) {
         return studentSocialService.getStudentProfile(
+
+    @PostMapping("/{studentId}/profile/picture")
+    public ResponseEntity<StoredMedia> uploadProfilePicture(
+            @AuthenticationPrincipal Jwt principal,
+            @PathVariable UUID studentId,
+            @RequestPart("file") MultipartFile file) {
+        UUID currentStudentId = currentStudentId(principal);
+        if (!studentId.equals(currentStudentId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        StoredMedia storedMedia = studentSocialService.updateStudentProfilePicture(studentId, file);
+        return ResponseEntity.status(HttpStatus.CREATED).body(storedMedia);
+    }
+
+
+    @DeleteMapping("/{studentId}/profile/picture")
+    public ResponseEntity<Void> deleteProfilePicture(
+            @AuthenticationPrincipal Jwt principal,
+            @PathVariable UUID studentId) {
+        UUID currentStudentId = currentStudentId(principal);
+        if (!studentId.equals(currentStudentId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        studentSocialService.deleteStudentProfilePicture(studentId);
+        return ResponseEntity.noContent().build();
+    }
+
+
+    @PostMapping("/{studentId}/cover-banner")
+    public ResponseEntity<StoredMedia> uploadCoverBanner(
+            @AuthenticationPrincipal Jwt principal,
+            @PathVariable UUID studentId,
+            @RequestPart("file") MultipartFile file) {
+        UUID currentStudentId = currentStudentId(principal);
+        if (!studentId.equals(currentStudentId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        StoredMedia storedMedia = studentSocialService.updateStudentCoverBanner(studentId, file);
+        return ResponseEntity.status(HttpStatus.CREATED).body(storedMedia);
+    }
+
+
+    @DeleteMapping("/{studentId}/cover-banner")
+    public ResponseEntity<Void> deleteCoverBanner(
+            @AuthenticationPrincipal Jwt principal,
+            @PathVariable UUID studentId) {
+        UUID currentStudentId = currentStudentId(principal);
+        if (!studentId.equals(currentStudentId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        studentSocialService.deleteStudentCoverBanner(studentId);
+        return ResponseEntity.noContent().build();
+    }
                 studentId, currentStudentId(principal));
     }
 

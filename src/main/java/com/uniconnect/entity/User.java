@@ -56,6 +56,11 @@ public class User {
     @Column(name = "profile_image_url", length = 2048)
     private String profileImageUrl;
 
+    @Size(max = 2048)
+    @Nationalized
+    @Column(name = "cover_banner_url", length = 2048)
+    private String coverBannerUrl;
+
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(

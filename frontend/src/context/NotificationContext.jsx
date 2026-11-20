@@ -32,10 +32,10 @@ export function NotificationProvider({ children }) {
   const markAsRead = useCallback(
     async (notificationId) => {
       try {
-        const updated = await api.put(`/api/notifications/${notificationId}/read`)
+        await api.put(`/api/notifications/${notificationId}/read`)
         setNotifications((prev) =>
           prev.map((n) =>
-            n.id === updated.data.id
+            n.id === notificationId
               ? { ...n, isRead: true }
               : n,
           ),
@@ -60,14 +60,19 @@ export function NotificationProvider({ children }) {
     }
   }, [])
 
-  const removeNotification = useCallback(
+const removeNotification = useCallback(
     async (notificationId) => {
       try {
         await api.delete(`/api/notifications/${notificationId}`)
-        setNotifications((prev) => prev.filter((n) => n.id !== notificationId))
-        setUnreadCount((prev) => Math.max(0, prev - 1))
+        setNotifications((prev) => {
+          const removed = prev.find((n) => n.id === notificationId)
+          setUnreadCount((count) =>
+            removed && !removed.isRead ? Math.max(0, count - 1) : count,
+          )
+          return prev.filter((n) => n.id !== notificationId)
+        })
       } catch {
-        // Ignore failures
+        // Ignore individual delete failures
       }
     },
     [],

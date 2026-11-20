@@ -19,6 +19,7 @@ function Notifications() {
   } = useNotifications()
   const navigate = useNavigate()
   const [accepting, setAccepting] = useState(new Set())
+  const [dismissTimeouts] = useState(new Map())
 
   const iconByType = {
     POST_LIKE: <Heart size={16} aria-hidden="true" />,

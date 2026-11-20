@@ -3,7 +3,6 @@ import { ArrowLeft, MessageSquareText, Search, Send } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/useAuth'
 import { api } from '../services/api'
-import ThemeToggle from '../components/ThemeToggle'
 import './Messages.css'
 
 const POLL_INTERVAL_MS = 5000
@@ -56,7 +55,9 @@ function Messages() {
   const [contactError, setContactError] = useState('')
   const [messageError, setMessageError] = useState('')
   const [sendError, setSendError] = useState('')
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const messagesEndRef = useRef(null)
+
   const selectedContact =
     loadedContact?.id === selectedContactId
       ? loadedContact
@@ -89,9 +90,8 @@ function Messages() {
     }
 
     loadConversations()
-    const intervalId = window.setInterval(() => {
-      if (!firstLoad) loadConversations()
-    }, POLL_INTERVAL_MS)
+    const intervalId =
+      setInterval(loadConversations, POLL_INTERVAL_MS)
 
     return () => {
       controller.abort()
@@ -198,17 +198,28 @@ function Messages() {
     }
 
     loadMessages()
-    const intervalId = window.setInterval(loadMessages, POLL_INTERVAL_MS)
+    const messageIntervalId =
+      setInterval(loadMessages, POLL_INTERVAL_MS)
 
     return () => {
       controller.abort()
-      window.clearInterval(intervalId)
+      window.clearInterval(messageIntervalId)
     }
   }, [selectedContactId])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView?.({ behavior: 'smooth' })
   }, [messages])
+
+  useEffect(() => {
+    if (window.innerWidth > 680) {
+      setIsSidebarOpen(false)
+    }
+  }, [])
+
+  function toggleSidebar() {
+    setIsSidebarOpen((prev) => !prev)
+  }
 
   function selectContact(contact) {
     setLoadedContact(contact)
@@ -219,6 +230,9 @@ function Messages() {
     setIsLoadingMessages(true)
     setDraft('')
     setSendError('')
+    if (window.innerWidth <= 680) {
+      setIsSidebarOpen(false)
+    }
   }
 
   function clearContact() {
@@ -290,15 +304,28 @@ function Messages() {
           </span>
           Uni<span>Connect</span>
         </Link>
-        <Link className="messages-back-link" to={dashboardPath}>
-          <ArrowLeft size={15} aria-hidden="true" />
-          Dashboard
-        </Link>
-        <ThemeToggle />
+        {window.innerWidth <= 680 && (
+          <button
+            className="messages-chat__mobile-back"
+            type="button"
+            onClick={toggleSidebar}
+            aria-label={isSidebarOpen ? 'Close conversations' : 'Open conversations'}
+          >
+            <ArrowLeft size={18} aria-hidden="true" />
+          </button>
+        )}
       </header>
 
-      <section className="messages-layout" aria-label="Messages">
+      <section className={`messages-layout ${isSidebarOpen ? 'messages-layout--sidebar-open' : ''}`} aria-label="Messages">
         <aside className="messages-sidebar">
+          <button
+            className="messages-sidebar__close"
+            type="button"
+            onClick={toggleSidebar}
+            aria-label="Close conversations"
+          >
+            <ArrowLeft size={18} aria-hidden="true" />
+          </button>
           <div className="messages-sidebar__heading">
             <div>
               <p className="messages-eyebrow">YOUR NETWORK</p>
@@ -385,7 +412,9 @@ function Messages() {
                 </button>
                 <ContactAvatar contact={selectedContact} />
                 <div className="messages-chat__person">
-                  <h2>{selectedContact.fullName}</h2>
+                  <Link to={dashboardPath} className="messages-chat__profile-link" aria-label={`View ${selectedContact.fullName}'s profile`}>
+                    <h2>{selectedContact.fullName}</h2>
+                  </Link>
                   <p>{roleLabel(selectedContact.role)}</p>
                 </div>
               </header>
@@ -412,18 +441,23 @@ function Messages() {
                         className={`messages-bubble-row${isOwnMessage ? ' messages-bubble-row--own' : ''}`}
                         key={message.id}
                       >
-                        <article
-                          className={`messages-bubble${isOwnMessage ? ' messages-bubble--own' : ''}`}
-                          aria-label={isOwnMessage ? 'Your message' : `${selectedContact.fullName}'s message`}
-                        >
-                          <p>{message.content}</p>
-                          <time dateTime={message.sentAt}>
-                            {new Date(message.sentAt).toLocaleTimeString([], {
-                              hour: 'numeric',
-                              minute: '2-digit',
-                            })}
-                          </time>
-                        </article>
+                          <article
+                            className={`messages-bubble${isOwnMessage ? ' messages-bubble--own' : ''}`}
+                            aria-label={isOwnMessage ? 'Your message' : `${selectedContact.fullName}'s message`}
+                          >
+                            <p>{message.content}</p>
+                            <time dateTime={message.sentAt}>
+                              {new Date(message.sentAt).toLocaleTimeString([], {
+                                hour: 'numeric',
+                                minute: '2-digit',
+                              })}
+                              {isOwnMessage && (
+                                <span className="message-read-receipt" aria-hidden="true">
+                                  ✔
+                                </span>
+                              )}
+                            </time>
+                          </article>
                       </div>
                     )
                   })
@@ -482,10 +516,11 @@ function Messages() {
 function ContactButton({ contact, lastMessage, onClick, selected }) {
   return (
     <button
-      className={`messages-contact${selected ? ' messages-contact--selected' : ''}`}
+      className={`messages-contact lift${selected ? ' messages-contact--selected' : ''}`}
       type="button"
       onClick={onClick}
       aria-pressed={selected}
+      aria-label={contact.fullName}
     >
       <ContactAvatar contact={contact} />
       <span className="messages-contact__details">

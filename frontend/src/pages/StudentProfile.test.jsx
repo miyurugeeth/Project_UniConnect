@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { api } from '../services/api'
 import { ThemeProvider } from '../context/ThemeContext.jsx'
+import { NotificationProvider } from '../context/NotificationContext.jsx'
 import StudentProfile from './StudentProfile'
 
 vi.mock('../services/api', () => ({
@@ -15,7 +16,7 @@ vi.mock('../services/api', () => ({
 }))
 
 vi.mock('../context/useAuth', () => ({
-  useAuth: () => ({ user: { userId: 'student-1' } }),
+  useAuth: () => ({ user: { userId: 'student-1' }, logout: vi.fn() }),
 }))
 
 const profile = {
@@ -42,9 +43,11 @@ it('loads and displays the selected student profile', async () => {
   render(
     <MemoryRouter initialEntries={['/student/profiles/student-2']}>
       <ThemeProvider>
-        <Routes>
-          <Route path="/student/profiles/:studentId" element={<StudentProfile />} />
-        </Routes>
+        <NotificationProvider>
+          <Routes>
+            <Route path="/student/profiles/:studentId" element={<StudentProfile />} />
+          </Routes>
+        </NotificationProvider>
       </ThemeProvider>
     </MemoryRouter>,
   )
@@ -85,9 +88,11 @@ it('follows a student and loads their followers', async () => {
   render(
     <MemoryRouter initialEntries={['/student/profiles/student-2']}>
       <ThemeProvider>
-        <Routes>
-          <Route path="/student/profiles/:studentId" element={<StudentProfile />} />
-        </Routes>
+        <NotificationProvider>
+          <Routes>
+            <Route path="/student/profiles/:studentId" element={<StudentProfile />} />
+          </Routes>
+        </NotificationProvider>
       </ThemeProvider>
     </MemoryRouter>,
   )

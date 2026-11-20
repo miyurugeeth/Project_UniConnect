@@ -1,23 +1,25 @@
 .theme-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
   min-height: 36px;
-  padding: 0 12px;
-  border-radius: 8px;
+  width: 70px;
+  padding: 0 var(--space-3);
   border: 1px solid var(--border-input);
+  border-radius: var(--radius-full);
   background: var(--input-bg);
   color: var(--input-text);
-  font: inherit;
-  font-size: 12px;
-  font-weight: 650;
   cursor: pointer;
-  transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+  position: relative;
+  overflow: hidden;
+  transition:
+    background var(--transition-base),
+    border-color var(--transition-base);
 }
 
-.theme-toggle:hover {
-  border-color: var(--navy);
-  background: var(--hover-bg);
+.theme-toggle:hover:not(:disabled) {
+  border-color: var(--border);
+  background: var(--surface-hover);
 }
 
 .theme-toggle:focus-visible {
@@ -26,20 +28,62 @@
 }
 
 .theme-toggle__icon {
-  display: grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
+  position: absolute;
+  top: 50%;
+  transform: translatey(-50%);
+  opacity: 0.6;
+  transition:
+    opacity var(--transition-base),
+    transform var(--transition-base);
 }
 
 .theme-toggle__icon--sun {
-  display: none;
+  left: 14px;
+}
+
+.theme-toggle__icon--moon {
+  right: 14px;
+}
+
+.theme-toggle__icon svg {
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.05));
 }
 
 [data-theme='dark'] .theme-toggle__icon--sun {
-  display: grid;
+  opacity: 1;
+  transform: translatey(-50%) translatex(16px);
+  color: var(--gold);
 }
 
 [data-theme='dark'] .theme-toggle__icon--moon {
-  display: none;
+  opacity: 0.3;
+  transform: translatey(-50%) translatex(-16px);
+}
+
+[data-theme='light'] .theme-toggle__icon--sun {
+  opacity: 0.3;
+  transform: translatey(-50%) translatex(-16px);
+}
+
+[data-theme='light'] .theme-toggle__icon--moon {
+  opacity: 1;
+  transform: translatey(-50%) translatex(16px);
+  color: var(--navy);
+}
+
+.theme-toggle::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--white);
+  box-shadow: 0 1px 3px var(--shadow-sm);
+  transition: transform var(--transition-base);
+}
+
+[data-theme='dark'] .theme-toggle::before {
+  transform: translatex(32px);
 }

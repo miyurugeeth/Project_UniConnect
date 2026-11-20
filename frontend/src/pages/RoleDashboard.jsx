@@ -1,13 +1,11 @@
-import { GraduationCap, LogOut, MessageSquareText, Sparkles } from 'lucide-react'
-import { Link, useNavigate } from 'react-router-dom'
+import { GraduationCap, MessageSquareText, Sparkles } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../context/useAuth'
-import ThemeToggle from '../components/ThemeToggle'
-import NotificationBell from '../components/NotificationBell'
+import { api } from '../services/api'
 import './Dashboard.css'
 
 function RoleDashboard({ role }) {
-  const { logout, user } = useAuth()
-  const navigate = useNavigate()
+  const { user } = useAuth()
   const isProfessional = role === 'PROFESSIONAL'
 
   function handleLogout() {
@@ -34,12 +32,6 @@ function RoleDashboard({ role }) {
           <span className="dashboard-role">
             {isProfessional ? 'Professional space' : 'Admin space'}
           </span>
-          <ThemeToggle />
-          <NotificationBell />
-          <button className="dashboard-logout" type="button" onClick={handleLogout}>
-            <LogOut size={16} aria-hidden="true" />
-            <span>Log out</span>
-          </button>
         </div>
       </header>
       <section className="role-placeholder">

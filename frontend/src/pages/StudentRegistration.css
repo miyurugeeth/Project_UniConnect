@@ -35,7 +35,7 @@
 }
 
 .registration-grid .form-field label {
-  color: #27374c;
+  color: var(--text-light);
   font-size: 11px;
   font-weight: 650;
 }
@@ -69,17 +69,17 @@
   width: 100%;
   min-width: 0;
   padding: 11px 12px;
-  color: #26364a;
-  border: 1px solid #e1e4e9;
-  border-radius: 9px;
+  color: var(--input-text);
+  border: 1px solid var(--border-input);
+  border-radius: var(--radius-md);
   outline: 0;
-  background: rgba(255, 255, 255, 0.86);
+  background: var(--input-bg);
   font: inherit;
   font-size: 12px;
   transition:
-    border-color 160ms ease,
-    box-shadow 160ms ease,
-    background 160ms ease;
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background var(--transition-fast);
 }
 
 .registration-textarea {
@@ -90,24 +90,24 @@
 
 .registration-textarea:focus,
 .registration-plain-input:focus {
-  border-color: #8ca0ba;
-  background: var(--white);
+  border-color: var(--border-focus);
+  background: var(--input-bg);
   box-shadow: 0 0 0 3px rgba(23, 54, 93, 0.08);
 }
 
 .registration-textarea[aria-invalid="true"],
 .registration-plain-input--error {
-  border-color: #c44f4f;
+  border-color: var(--danger);
 }
 
 .registration-textarea::placeholder,
 .registration-plain-input::placeholder {
-  color: #a4acb7;
+  color: var(--input-placeholder);
   opacity: 1;
 }
 
 .registration-help {
-  color: #8992a0;
+  color: var(--text-muted);
   font-size: 10px;
   line-height: 1.45;
 }
@@ -115,10 +115,10 @@
 .registration-message {
   margin: 0;
   padding: 11px 12px;
-  color: #963b36;
-  border: 1px solid #f0d7d4;
-  border-radius: 8px;
-  background: #fff7f6;
+  color: var(--danger);
+  border: 1px solid var(--danger-bg);
+  border-radius: var(--radius-sm);
+  background: var(--danger-bg);
   font-size: 11px;
   line-height: 1.55;
   overflow-wrap: anywhere;
@@ -144,8 +144,8 @@
   place-items: center;
   margin: 0 auto 20px;
   color: var(--navy-dark);
-  border-radius: 17px;
-  background: #f0e5c9;
+  border-radius: var(--radius-md);
+  background: var(--warning-bg);
 }
 
 .registration-success .welcome-tag {
@@ -158,7 +158,7 @@
 
 .registration-success > p {
   margin: 0 auto;
-  color: var(--muted);
+  color: var(--text-muted);
   font-size: 13px;
   line-height: 1.65;
 }

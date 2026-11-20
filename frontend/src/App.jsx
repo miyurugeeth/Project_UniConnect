@@ -12,6 +12,8 @@ import StudentProfile from './pages/StudentProfile'
 import Messages from './pages/Messages'
 import Notifications from './pages/Notifications'
 
+import Layout from './components/Layout'
+
 const dashboardPaths = {
   STUDENT: '/student/dashboard',
   PROFESSIONAL: '/professional/dashboard',
@@ -69,57 +71,71 @@ function App() {
         <Route
           path="/student/dashboard"
           element={
-            <ProtectedRoute allowedRoles={['STUDENT']}>
-              <StudentDashboard />
-            </ProtectedRoute>
+            <Layout>
+              <ProtectedRoute allowedRoles={['STUDENT']}>
+                <StudentDashboard />
+              </ProtectedRoute>
+            </Layout>
           }
         />
         <Route
           path="/student/feed"
           element={
-            <ProtectedRoute allowedRoles={['STUDENT']}>
-              <StudentSocialFeed />
-            </ProtectedRoute>
+            <Layout>
+              <ProtectedRoute allowedRoles={['STUDENT']}>
+                <StudentSocialFeed />
+              </ProtectedRoute>
+            </Layout>
           }
         />
         <Route
           path="/student/profiles/:studentId"
           element={
-            <ProtectedRoute allowedRoles={['STUDENT']}>
-              <StudentProfile />
-            </ProtectedRoute>
+            <Layout>
+              <ProtectedRoute allowedRoles={['STUDENT']}>
+                <StudentProfile />
+              </ProtectedRoute>
+            </Layout>
           }
         />
         <Route
           path="/messages"
           element={
-            <ProtectedRoute allowedRoles={['STUDENT', 'PROFESSIONAL', 'ADMIN']}>
-              <Messages />
-            </ProtectedRoute>
+            <Layout>
+              <ProtectedRoute allowedRoles={['STUDENT', 'PROFESSIONAL', 'ADMIN']}>
+                <Messages />
+              </ProtectedRoute>
+            </Layout>
           }
         />
         <Route
           path="/notifications"
           element={
-            <ProtectedRoute allowedRoles={['STUDENT', 'PROFESSIONAL', 'ADMIN']}>
-              <Notifications />
-            </ProtectedRoute>
+            <Layout>
+              <ProtectedRoute allowedRoles={['STUDENT', 'PROFESSIONAL', 'ADMIN']}>
+                <Notifications />
+              </ProtectedRoute>
+            </Layout>
           }
         />
         <Route
           path="/professional/dashboard"
           element={
-            <ProtectedRoute allowedRoles={['PROFESSIONAL']}>
-              <ProfessionalDashboard />
-            </ProtectedRoute>
+            <Layout>
+              <ProtectedRoute allowedRoles={['PROFESSIONAL']}>
+                <ProfessionalDashboard />
+              </ProtectedRoute>
+            </Layout>
           }
         />
         <Route
           path="/admin/dashboard"
           element={
-            <ProtectedRoute allowedRoles={['ADMIN']}>
-              <RoleDashboard role="ADMIN" />
-            </ProtectedRoute>
+            <Layout>
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <RoleDashboard role="ADMIN" />
+              </ProtectedRoute>
+            </Layout>
           }
         />
         <Route path="*" element={<Navigate to="/" replace />} />

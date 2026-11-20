@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   ArrowRight,
   Bell,
@@ -47,6 +47,7 @@ export function NotificationDropdown() {
   } = useNotifications()
   const [open, setOpen] = useState(false)
   const [accepting, setAccepting] = useState(new Set())
+  const navigate = useNavigate()
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -65,7 +66,7 @@ export function NotificationDropdown() {
   function handleItemClick(notification) {
     markAsRead(notification.id)
     if (notification.linkTarget) {
-      window.location.href = notification.linkTarget
+      navigate(notification.linkTarget)
     }
     close()
   }

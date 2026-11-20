@@ -67,6 +67,7 @@ afterEach(() => {
 describe('StudentSocialFeed', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
     scrollIntoViewDescriptor = Object.getOwnPropertyDescriptor(
       HTMLElement.prototype,
       'scrollIntoView',

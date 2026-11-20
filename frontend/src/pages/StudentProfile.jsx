@@ -19,6 +19,13 @@ function StudentProfile() {
   const [isLoadingConnections, setIsLoadingConnections] = useState(false)
   const [connectionsError, setConnectionsError] = useState('')
 
+  const [profileImageUrl, setProfileImageUrl] = useState(null)
+  const [coverBannerUrl, setCoverBannerUrl] = useState(null)
+  const [isUploadingProfilePic, setIsUploadingProfilePic] = useState(false)
+  const [isUploadingCoverBanner, setIsUploadingCoverBanner] = useState(false)
+  const [profilePicError, setProfilePicError] = useState('')
+  const [coverBannerError, setCoverBannerError] = useState('')
+
   useEffect(() => {
     const controller = new AbortController()
 
@@ -65,6 +72,88 @@ function StudentProfile() {
       setFollowError('We could not update this follow. Please try again.')
     } finally {
       setIsUpdatingFollow(false)
+    }
+  }
+
+  // Profile picture change handler
+  async function handleProfilePictureChange(event) {
+    const file = event.target.files[0]
+    if (!file) return
+
+    setIsUploadingProfilePic(true)
+    setProfilePicError('')
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    try {
+      const response = await api.post(`/api/students/${studentId}/profile/picture`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      setProfileImageUrl(response.data.storageKey)
+      setProfilePicError('')
+    } catch (error) {
+      setProfilePicError(error.response?.data?.message || 'Failed to upload profile picture')
+    } finally {
+      setIsUploadingProfilePic(false)
+      event.target.value = ''
+    }
+  }
+
+  // Profile picture removal handler
+  async function handleProfilePictureRemove() {
+    setIsUploadingProfilePic(true)
+    setProfilePicError('')
+
+    try {
+      await api.delete(`/api/students/${studentId}/profile/picture`)
+      setProfileImageUrl(null)
+      setProfilePicError('')
+    } catch (error) {
+      setProfilePicError(error.response?.data?.message || 'Failed to remove profile picture')
+    } finally {
+      setIsUploadingProfilePic(false)
+    }
+  }
+
+  // Cover banner change handler
+  async function handleCoverBannerChange(event) {
+    const file = event.target.files[0]
+    if (!file) return
+
+    setIsUploadingCoverBanner(true)
+    setCoverBannerError('')
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    try {
+      const response = await api.post(`/api/students/${studentId}/cover-banner`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      setCoverBannerUrl(response.data.storageKey)
+      setCoverBannerError('')
+    } catch (error) {
+      setCoverBannerError(error.response?.data?.message || 'Failed to upload cover banner')
+    } finally {
+      setIsUploadingCoverBanner(false)
+      event.target.value = ''
+    }
+  }
+
+  // Cover banner removal handler
+  async function handleCoverBannerRemove() {
+    setIsUploadingCoverBanner(true)
+    setCoverBannerError('')
+
+    try {
+      await api.delete(`/api/students/${studentId}/cover-banner`)
+      setCoverBannerUrl(null)
+      setCoverBannerError('')
+    } catch (error) {
+      setCoverBannerError(error.response?.data?.message || 'Failed to remove cover banner')
+    } finally {
+      setIsUploadingCoverBanner(false)
     }
   }
 

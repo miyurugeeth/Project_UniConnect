@@ -460,6 +460,89 @@ public class StudentSocialService {
         commentRepository.delete(comment);
     }
 
+    /**
+     * Updates the student's profile picture.
+     * Only the student themselves can update their own profile picture.
+     *
+     * @param studentId the student's user ID
+     * @param file the profile image file to upload
+     * @return the stored media information
+     * @throws ResponseStatusException if the student is not authorized or the file is invalid
+     */
+    public StoredMedia updateStudentProfilePicture(UUID studentId, MultipartFile file) {
+        StudentProfile profile = requireProfile(studentId);
+        requireProfileOwner(studentId, profile);
+
+        if (file == null || file.isEmpty()) {
+            throw badRequest("Profile picture must not be empty.");
+        }
+
+        StoredMedia storedMedia = mediaStorageService.store(file);
+        profile.getUser().setProfileImageUrl(storedMedia.storageKey());
+        studentProfileRepository.save(profile);
+
+        return storedMedia;
+    }
+
+    /**
+     * Removes the student's profile picture.
+     * Only the student themselves can remove their own profile picture.
+     * Also deletes the underlying storage file.
+     *
+     * @param studentId the student's user ID
+     * @throws ResponseStatusException if the student is not authorized
+     */
+    public void deleteStudentProfilePicture(UUID studentId) {
+        StudentProfile profile = requireProfile(studentId);
+        requireProfileOwner(studentId, profile);
+
+        String previousImageKey = profile.getUser().getProfileImageUrl();
+        if (previousImageKey != null && !previousImageKey.isEmpty()) {
+            mediaStorageService.delete(previousImageKey);
+        }
+        profile.getUser().setProfileImageUrl(null);
+        studentProfileRepository.save(profile);
+    }
+
+    /**
+     * Updates the student's cover banner.
+     * Only the student themselves can update their own cover banner.
+     *
+     * @param studentId the student's user ID
+     * @param file the cover banner file to upload
+     * @return the stored media information
+     * @throws ResponseStatusException if the student is not authorized or the file is invalid
+     */
+    public StoredMedia updateStudentCoverBanner(UUID studentId, MultipartFile file) {
+        StudentProfile profile = requireProfile(studentId);
+        requireProfileOwner(studentId, profile);
+
+        if (file == null || file.isEmpty()) {
+            throw badRequest("Cover banner must not be empty.");
+        }
+
+        StoredMedia storedMedia = mediaStorageService.store(file);
+        profile.getUser().setCoverBannerUrl(storedMedia.storageKey());
+        studentProfileRepository.save(profile);
+
+        return storedMedia;
+    }
+
+    /**
+     * Removes the student's cover banner.
+     * Only the student themselves can remove their own cover banner.
+     *
+     * @param studentId the student's user ID
+     * @throws ResponseStatusException if the student is not authorized
+     */
+    public void deleteStudentCoverBanner(UUID studentId) {
+        StudentProfile profile = requireProfile(studentId);
+        requireProfileOwner(studentId, profile);
+
+        profile.getUser().setCoverBannerUrl(null);
+        studentProfileRepository.save(profile);
+    }
+
     @Transactional(readOnly = true)
     public MediaFileContent getAttachmentContent(UUID attachmentId) {
         StudentPostAttachment attachment =

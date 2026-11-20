@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { api } from '../services/api'
 import { ThemeProvider } from '../context/ThemeContext.jsx'
+import { NotificationProvider } from '../context/NotificationContext.jsx'
 import Messages from './Messages'
 
 vi.mock('../services/api', () => ({
@@ -14,7 +15,7 @@ vi.mock('../services/api', () => ({
 }))
 
 vi.mock('../context/useAuth', () => ({
-  useAuth: () => ({ user: { userId: 'student-1', role: 'STUDENT' } }),
+  useAuth: () => ({ user: { userId: 'student-1', role: 'STUDENT' }, logout: vi.fn() }),
 }))
 
 const contact = {
@@ -55,7 +56,9 @@ it('searches for a user, opens the chat box, and sends a direct message', async 
   render(
     <MemoryRouter initialEntries={['/messages']}>
       <ThemeProvider>
-        <Messages />
+        <NotificationProvider>
+          <Messages />
+        </NotificationProvider>
       </ThemeProvider>
     </MemoryRouter>,
   )

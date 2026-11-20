@@ -7,7 +7,7 @@
 }
 
 .professional-registration .registration-success__icon {
-  background: #f0e5c9;
+  background: var(--warning-bg);
 }
 
 .professional-registration .registration-submit {
