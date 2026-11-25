@@ -41,30 +41,6 @@ export const api = axios.create({
   },
 })
 
-export function getNotifications(page = 0, size = 20) {
-  return api.get('/api/notifications', { params: { page, size } })
-}
-
-export function getUnreadCount() {
-  return api.get('/api/notifications/unread-count')
-}
-
-export function markNotificationAsRead(notificationId) {
-  return api.put(`/api/notifications/${notificationId}/read`)
-}
-
-export function markAllNotificationsAsRead() {
-  return api.put('/api/notifications/read-all')
-}
-
-export function deleteNotification(notificationId) {
-  return api.delete(`/api/notifications/${notificationId}`)
-}
-
-export function acceptFollowRequest(studentId) {
-  return api.post(`/api/students/${studentId}/follow/accept`)
-}
-
 api.interceptors.request.use((config) => {
   const isLoginRequest = config.url?.includes('/api/auth/login')
   const authentication = isLoginRequest ? null : getStoredAuthentication()

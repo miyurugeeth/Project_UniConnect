@@ -35,6 +35,10 @@ function AppShell() {
     user?.role === 'ADMIN'
       ? [
           { label: 'Overview', to: '/admin/dashboard', icon: Home },
+          { label: 'Community feed', to: '/student/feed', icon: Newspaper },
+          { label: 'Create post', to: '/student/feed?compose=true', icon: PencilLine },
+          { label: 'My posts', to: '/student/feed?mine=true', icon: Newspaper },
+          { label: 'Connections', to: '/student/feed?view=connections', icon: UsersRound },
           { label: 'Messages', to: '/messages', icon: MessageSquareText },
           { label: 'Notifications', to: '/notifications', icon: Newspaper },
         ]
@@ -50,6 +54,9 @@ function AppShell() {
 
   function isCurrentItem(item) {
     if (item.label === 'Home') {
+      return location.pathname === '/student/feed' && !location.search && !location.hash
+    }
+    if (item.label === 'Community feed') {
       return location.pathname === '/student/feed' && !location.search && !location.hash
     }
     if (item.to.includes('?mine=true')) {

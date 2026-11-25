@@ -5,13 +5,14 @@ import { useAuth } from './context/useAuth'
 import Login from './pages/Login'
 import ProfessionalRegistration from './pages/ProfessionalRegistration'
 import ProfessionalDashboard from './pages/ProfessionalDashboard'
-import RoleDashboard from './pages/RoleDashboard'
 import StudentRegistration from './pages/StudentRegistration'
 import StudentDashboard from './pages/StudentDashboard'
 import StudentSocialFeed from './pages/StudentSocialFeed'
 import StudentProfile from './pages/StudentProfile'
 import Messages from './pages/Messages'
 import Notifications from './pages/Notifications'
+import AdminDashboard from './pages/AdminDashboard'
+import AdminSetup from './pages/AdminSetup'
 
 const homePaths = {
   STUDENT: '/student/feed',
@@ -61,6 +62,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomeRedirect />} />
         <Route path="/login" element={<LoginRoute />} />
+        <Route path="/admin/setup" element={<AdminSetup />} />
         <Route
           path="/register"
           element={
@@ -90,7 +92,7 @@ function App() {
             <Route
               path="/student/feed"
               element={
-                <ProtectedRoute allowedRoles={['STUDENT', 'PROFESSIONAL']}>
+                <ProtectedRoute allowedRoles={['STUDENT', 'PROFESSIONAL', 'ADMIN']}>
                   <StudentFeedRoute />
                 </ProtectedRoute>
               }
@@ -131,7 +133,15 @@ function App() {
               path="/admin/dashboard"
               element={
                 <ProtectedRoute allowedRoles={['ADMIN']}>
-                  <RoleDashboard role="ADMIN" />
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/community"
+              element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                  <StudentFeedRoute />
                 </ProtectedRoute>
               }
             />
