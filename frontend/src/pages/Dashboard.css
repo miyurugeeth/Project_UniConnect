@@ -107,8 +107,7 @@
 }
 
 .dashboard-welcome h1,
-.dashboard-state h1,
-.role-placeholder h1 {
+.dashboard-state h1 {
   margin: 0;
   color: var(--text-dark);
   font-size: clamp(28px, 4vw, 38px);
@@ -545,8 +544,7 @@
   }
 }
 
-.dashboard-state__icon,
-.role-placeholder__icon {
+.dashboard-state__icon {
   display: grid;
   width: 54px;
   height: 54px;
@@ -561,29 +559,6 @@
   color: #fff;
   border: 1px solid #17365d;
   background: #17365d;
-}
-
-.role-placeholder {
-  display: flex;
-  width: min(100% - 40px, 620px);
-  min-height: calc(100vh - 74px);
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto;
-  text-align: center;
-}
-
-.role-placeholder .dashboard-eyebrow {
-  margin-top: 24px;
-}
-
-.role-placeholder > p:last-child {
-  max-width: 490px;
-  margin: 13px 0 0;
-  color: #778393;
-  font-size: 14px;
-  line-height: 1.75;
 }
 
 @media (max-width: 700px) {

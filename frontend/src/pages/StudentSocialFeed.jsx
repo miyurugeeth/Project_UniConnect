@@ -58,6 +58,7 @@ function ProtectedPostMedia({ attachment }) {
 
 function StudentSocialFeed() {
   const { user } = useAuth()
+  const isAdmin = user?.role === 'ADMIN'
   const [searchParams, setSearchParams] = useSearchParams()
   const mineOnly = searchParams.get('mine') === 'true'
   const connectionsView = searchParams.get('view') === 'connections'
@@ -335,7 +336,9 @@ function StudentSocialFeed() {
   async function handleDelete(postId) {
     setPostMessage('')
     try {
-      await api.delete(`/api/students/posts/${postId}`)
+      await api.delete(
+        isAdmin ? `/api/admin/posts/${postId}` : `/api/students/posts/${postId}`,
+      )
       if (editingPostId === postId) cancelEditing()
       if (page > 0 && feed.content.length === 1) {
         setPage((current) => Math.max(0, current - 1))
@@ -527,7 +530,11 @@ function StudentSocialFeed() {
   async function deleteComment(postId, commentId) {
     setSavingCommentsFor((current) => new Set(current).add(postId))
     try {
-      await api.delete(`/api/students/posts/${postId}/comments/${commentId}`)
+      await api.delete(
+        isAdmin
+          ? `/api/admin/posts/${postId}/comments/${commentId}`
+          : `/api/students/posts/${postId}/comments/${commentId}`,
+      )
       const currentCount = Number(
         feed.content.find((post) => post.id === postId)?.commentCount || 0,
       )
@@ -922,7 +929,11 @@ function StudentSocialFeed() {
                         <strong>{post.author.fullName}</strong>
                       )}
                       <span className="social-post__role">
-                        {post.author.role === 'PROFESSIONAL' ? 'Industry professional' : 'University student'}
+                      {post.author.role === 'PROFESSIONAL'
+                        ? 'Industry professional'
+                        : post.author.role === 'ADMIN'
+                          ? 'Administrator'
+                          : 'University student'}
                       </span>
                       <span>
                         {[
@@ -1030,7 +1041,7 @@ function StudentSocialFeed() {
                                   ) : (
                                     <p>{comment.content}</p>
                                   )}
-                                  {comment.author.id === user?.userId &&
+                                  {(isAdmin || comment.author.id === user?.userId) &&
                                     editingComment?.id !== comment.id && (
                                       <div className="social-comment__actions">
                                         <button
@@ -1051,7 +1062,7 @@ function StudentSocialFeed() {
                                           disabled={savingCommentsFor.has(post.id)}
                                           onClick={() => deleteComment(post.id, comment.id)}
                                         >
-                                          Delete
+                                          {isAdmin ? 'Remove' : 'Delete'}
                                         </button>
                                       </div>
                                     )}
@@ -1111,7 +1122,7 @@ function StudentSocialFeed() {
                         </form>
                       </section>
                     )}
-                    {post.author.id === user?.userId && (
+                    {(isAdmin || post.author.id === user?.userId) && (
                       <div className="social-post__controls">
                         <button
                           className="social-text-button"
@@ -1125,7 +1136,7 @@ function StudentSocialFeed() {
                           type="button"
                           onClick={() => handleDelete(post.id)}
                         >
-                          Delete
+                          {isAdmin ? 'Remove post' : 'Delete'}
                         </button>
                       </div>
                     )}

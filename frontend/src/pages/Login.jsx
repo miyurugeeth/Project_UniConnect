@@ -49,8 +49,6 @@ function Login() {
 
     if (!trimmedEmail) {
       nextErrors.email = 'Enter your email address.'
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
-      nextErrors.email = 'Enter a valid email address.'
     }
 
     if (!password) {
@@ -84,6 +82,11 @@ function Login() {
 
       if (status === 401) {
         setFormMessage('The email address or password is incorrect.')
+      } else if (status === 423) {
+        setFormMessage(
+          error.response?.data?.message ||
+            'Your account has been suspended. Please contact UniConnect support.',
+        )
       } else if (error.request && !error.response) {
         setFormMessage(
           'Unable to reach UniConnect. Check that the backend is running and try again.',
@@ -203,15 +206,15 @@ function Login() {
 
           <form className="login-form" onSubmit={handleSubmit} noValidate>
             <div className="form-field">
-              <label htmlFor="email">Email address</label>
+              <label htmlFor="email">Username or email address</label>
               <div className={`input-shell${errors.email ? ' input-shell--error' : ''}`}>
                 <Mail size={18} aria-hidden="true" />
                 <input
-                  autoComplete="email"
+                  autoComplete="username"
                   id="email"
                   name="email"
-                  type="email"
-                  placeholder="you@university.edu.lk"
+                  type="text"
+                  placeholder="Your username or email"
                   value={email}
                   onChange={handleEmailChange}
                   aria-invalid={Boolean(errors.email)}
@@ -293,6 +296,12 @@ function Login() {
             <span>Don&apos;t have an account?</span>
             <Link className="text-link text-link--strong" to="/register">
               Register <ArrowRight size={15} aria-hidden="true" />
+            </Link>
+          </div>
+          <div className="signup-prompt">
+            <span>First time setting up admin?</span>
+            <Link className="text-link text-link--strong" to="/admin/setup">
+              Create initial admin
             </Link>
           </div>
 
