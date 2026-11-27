@@ -36,7 +36,7 @@ public class LocalSocialMediaStorageService implements SocialMediaStorageService
     private static final byte[] WEBM_SIGNATURE =
             new byte[] {0x1a, 0x45, (byte) 0xdf, (byte) 0xa3};
     private static final String STORAGE_KEY_PATTERN =
-            "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.(jpg|png|gif|mp4|webm)$";
+            "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.(jpg|png|gif|mp4|webm|pdf)$";
 
     private final Path storageRoot;
     private final SocialMediaProperties properties;
@@ -133,6 +133,9 @@ public class LocalSocialMediaStorageService implements SocialMediaStorageService
                 && (startsWithAscii(header, "GIF87a") || startsWithAscii(header, "GIF89a"))) {
             return validateImage(file, "gif");
         }
+        if (containsPdfHeader(file)) {
+            return new DetectedMedia(PostMediaType.PDF, "application/pdf", ".pdf");
+        }
         if (headerLength >= 12
                 && header[4] == 'f'
                 && header[5] == 't'
@@ -145,7 +148,7 @@ public class LocalSocialMediaStorageService implements SocialMediaStorageService
                 && containsWebmDocType(file)) {
             return new DetectedMedia(PostMediaType.VIDEO, "video/webm", ".webm");
         }
-        throw badRequest("Only valid JPEG, PNG, GIF, MP4, or WebM attachments are supported.");
+        throw badRequest("Only valid JPEG, PNG, GIF, MP4, WebM, or PDF attachments are supported.");
     }
 
     private DetectedMedia validateImage(Path file, String expectedFormat) throws IOException {
@@ -202,6 +205,21 @@ public class LocalSocialMediaStorageService implements SocialMediaStorageService
         for (int index = 0; index <= prefix.length - webm.length; index++) {
             if (Arrays.equals(
                     Arrays.copyOfRange(prefix, index, index + webm.length), webm)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean containsPdfHeader(Path file) throws IOException {
+        byte[] prefix;
+        try (InputStream input = Files.newInputStream(file)) {
+            prefix = input.readNBytes(1024);
+        }
+        byte[] signature = "%PDF-".getBytes(java.nio.charset.StandardCharsets.US_ASCII);
+        for (int index = 0; index <= prefix.length - signature.length; index++) {
+            if (Arrays.equals(
+                    Arrays.copyOfRange(prefix, index, index + signature.length), signature)) {
                 return true;
             }
         }

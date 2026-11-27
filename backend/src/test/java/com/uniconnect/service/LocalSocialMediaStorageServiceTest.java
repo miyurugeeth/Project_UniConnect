@@ -3,6 +3,7 @@ package com.uniconnect.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.uniconnect.config.SocialMediaProperties;
 import com.uniconnect.entity.PostMediaType;
@@ -68,6 +69,37 @@ class LocalSocialMediaStorageServiceTest {
         try (var files = Files.list(properties.getStorageDir())) {
             assertEquals(0, files.count());
         }
+    }
+
+    @Test
+    void storesPdfAttachmentsWithDetectedContentType() throws IOException {
+        byte[] pdf =
+                ("header\n".repeat(10) + "%PDF-1.7\nsample document")
+                        .getBytes(java.nio.charset.StandardCharsets.US_ASCII);
+        MockMultipartFile upload =
+                new MockMultipartFile("attachments", "notes.pdf", "text/plain", pdf);
+
+        SocialMediaStorageService.StoredMedia stored = storageService.store(upload);
+
+        assertEquals(PostMediaType.PDF, stored.mediaType());
+        assertEquals("application/pdf", stored.contentType());
+        assertEquals(pdf.length, storageService.load(stored.storageKey()).contentLength());
+        assertTrue(stored.storageKey().endsWith(".pdf"));
+    }
+
+    @Test
+    void rejectsFilesThatAreNotSupportedPdfContent() {
+        MockMultipartFile upload =
+                new MockMultipartFile(
+                        "attachments",
+                        "notes.pdf",
+                        "application/pdf",
+                        "not a PDF".getBytes(java.nio.charset.StandardCharsets.US_ASCII));
+
+        ResponseStatusException exception =
+                assertThrows(ResponseStatusException.class, () -> storageService.store(upload));
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
     }
 
     @Test

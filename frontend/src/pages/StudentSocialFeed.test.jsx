@@ -654,7 +654,7 @@ describe('StudentSocialFeed', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Create post' }))
     const file = new File(['image'], 'photo.png', { type: 'image/png' })
-    fireEvent.change(await screen.findByLabelText('Photos or video'), {
+    fireEvent.change(await screen.findByLabelText('Photos, videos, or PDFs'), {
       target: { files: [file] },
     })
 
@@ -685,7 +685,7 @@ describe('StudentSocialFeed', () => {
       target: { value: 'ICT_COMPUTING' },
     })
     const file = new File(['image'], 'photo.png', { type: 'image/png' })
-    fireEvent.change(screen.getByLabelText('Photos or video'), {
+    fireEvent.change(screen.getByLabelText('Photos, videos, or PDFs'), {
       target: { files: [file] },
     })
     fireEvent.click(screen.getByRole('button', { name: 'Publish post' }))
@@ -701,6 +701,44 @@ describe('StudentSocialFeed', () => {
     })
     expect(api.post.mock.calls[0][1].getAll('attachments')).toHaveLength(1)
     expect(api.post.mock.calls[0][1].getAll('attachments')[0].name).toBe('photo.png')
+  })
+
+  it('previews and uploads PDF attachments', async () => {
+    render(
+      <MemoryRouter>
+        <ThemeProvider>
+          <NotificationProvider>
+            <StudentSocialFeed />
+          </NotificationProvider>
+        </ThemeProvider>
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Create post' }))
+    fireEvent.change(await screen.findByLabelText('Post text'), {
+      target: { value: 'Sharing my notes' },
+    })
+    const categorySelect = screen.getByLabelText('Post category')
+    await within(categorySelect).findByRole('option', { name: 'ICT and Computing' })
+    fireEvent.change(categorySelect, { target: { value: 'ICT_COMPUTING' } })
+    const pdf = new File(['%PDF-1.7'], 'lecture-notes.pdf', { type: 'application/pdf' })
+    fireEvent.change(screen.getByLabelText('Photos, videos, or PDFs'), {
+      target: { files: [pdf] },
+    })
+
+    expect(await screen.findByTitle('PDF preview: lecture-notes.pdf')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Publish post' }))
+
+    await waitFor(() => {
+      expect(api.post).toHaveBeenCalledWith(
+        '/api/students/posts',
+        expect.any(FormData),
+        expect.objectContaining({
+          headers: { 'Content-Type': 'multipart/form-data' },
+        }),
+      )
+    })
+    expect(api.post.mock.calls[0][1].getAll('attachments')[0].name).toBe('lecture-notes.pdf')
   })
 
   it('renders legacy posts without category data without failing', async () => {

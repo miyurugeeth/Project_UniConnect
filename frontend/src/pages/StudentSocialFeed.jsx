@@ -12,6 +12,7 @@ const MAX_IMAGE_BYTES = 10 * 1024 * 1024
 const MAX_VIDEO_BYTES = 100 * 1024 * 1024
 const ACCEPTED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/gif'])
 const ACCEPTED_VIDEO_TYPES = new Set(['video/mp4', 'video/webm'])
+const ACCEPTED_DOCUMENT_TYPES = new Set(['application/pdf'])
 
 function ProtectedPostMedia({ attachment }) {
   const [mediaUrl, setMediaUrl] = useState('')
@@ -45,6 +46,21 @@ function ProtectedPostMedia({ attachment }) {
     return <p className="social-message social-message--error">This attachment could not be loaded.</p>
   }
   if (!mediaUrl) return <p className="social-media-loading">Loading attachment…</p>
+
+  if (attachment.mediaType === 'PDF') {
+    return (
+      <>
+        <iframe
+          className="social-post__document"
+          src={mediaUrl}
+          title="Post PDF attachment"
+        />
+        <a className="social-document-link" href={mediaUrl} download="attachment.pdf">
+          Open or download PDF
+        </a>
+      </>
+    )
+  }
 
   return attachment.mediaType === 'VIDEO' ? (
     <video className="social-post__video" controls preload="metadata">
@@ -240,13 +256,19 @@ function StudentSocialFeed() {
     for (const file of files.slice(0, Math.max(remainingSlots, 0))) {
       const isImage = ACCEPTED_IMAGE_TYPES.has(file.type)
       const isVideo = ACCEPTED_VIDEO_TYPES.has(file.type)
-      if (!isImage && !isVideo) {
-        setAttachmentMessage('Use JPEG, PNG, GIF, MP4, or WebM files only.')
+      const isDocument = ACCEPTED_DOCUMENT_TYPES.has(file.type)
+      if (!isImage && !isVideo && !isDocument) {
+        setAttachmentMessage('Use JPEG, PNG, GIF, MP4, WebM, or PDF files only.')
         continue
       }
-      if ((isImage && file.size > MAX_IMAGE_BYTES) || (isVideo && file.size > MAX_VIDEO_BYTES)) {
+      if (
+        (isImage && file.size > MAX_IMAGE_BYTES) ||
+        ((isVideo || isDocument) && file.size > MAX_VIDEO_BYTES)
+      ) {
         setAttachmentMessage(
-          isImage ? 'Images must be 10 MiB or smaller.' : 'Videos must be 100 MiB or smaller.',
+          isImage
+            ? 'Images must be 10 MiB or smaller.'
+            : 'Videos and PDFs must be 100 MiB or smaller.',
         )
         continue
       }
@@ -786,19 +808,19 @@ function StudentSocialFeed() {
               placeholder="https://example.com/image.jpg"
             />
             <label className="social-label" htmlFor="post-attachments">
-              Photos or video
+              Photos, videos, or PDFs
             </label>
             <input
               id="post-attachments"
               type="file"
-              accept="image/jpeg,image/png,image/gif,video/mp4,video/webm"
+              accept="image/jpeg,image/png,image/gif,video/mp4,video/webm,application/pdf"
               multiple
               onChange={handleAttachmentSelection}
               disabled={retainedAttachments.length + selectedAttachments.length >= MAX_ATTACHMENTS}
             />
             <p className="social-upload-help">
               Up to {MAX_ATTACHMENTS} attachments, including {MAX_VIDEOS} video. Images up to 10 MiB;
-              videos up to 100 MiB.
+              videos and PDFs up to 100 MiB.
             </p>
             {attachmentMessage && (
               <p className="social-message social-message--error" role="alert">
@@ -821,7 +843,18 @@ function StudentSocialFeed() {
                 ))}
                 {selectedAttachments.map(({ file, previewUrl }) => (
                   <div className="social-attachment-preview__item" key={previewUrl}>
-                    {ACCEPTED_VIDEO_TYPES.has(file.type) ? (
+                    {ACCEPTED_DOCUMENT_TYPES.has(file.type) ? (
+                      <>
+                        <iframe
+                          className="social-post__document"
+                          src={previewUrl}
+                          title={`PDF preview: ${file.name}`}
+                        />
+                        <a className="social-document-link" href={previewUrl} download={file.name}>
+                          Open or download {file.name}
+                        </a>
+                      </>
+                    ) : ACCEPTED_VIDEO_TYPES.has(file.type) ? (
                       <video className="social-post__video" controls src={previewUrl} />
                     ) : (
                       <img className="social-post__image" src={previewUrl} alt="Selected preview" />

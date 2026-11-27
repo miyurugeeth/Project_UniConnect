@@ -453,6 +453,24 @@
   background: #102a46;
 }
 
+.social-post__document {
+  display: block;
+  width: min(100%, 720px);
+  height: min(70vh, 720px);
+  margin-top: 14px;
+  border: 1px solid var(--border-soft);
+  border-radius: 9px;
+  background: var(--surface);
+}
+
+.social-document-link {
+  display: inline-block;
+  margin-top: 8px;
+  color: var(--navy);
+  font-size: 12px;
+  font-weight: 650;
+}
+
 .social-media-loading,
 .social-upload-help {
   margin: 0;
