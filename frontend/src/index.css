@@ -1,0 +1,95 @@
+:root {
+  font-family: Inter, "Segoe UI", sans-serif;
+  color: #17243a;
+  background: #f8f6f0;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  font-optical-sizing: auto;
+  font-weight: 400;
+
+  /* Brand (shared) */
+  --navy: #17365d;
+  --navy-dark: #102a46;
+  --gold: #c99a3a;
+  --cream: #f8f6f0;
+  --white: #ffffff;
+  --muted: #6d7888;
+
+  /* Light theme surface tokens */
+  --bg: #f8f6f0;
+  --surface: #ffffff;
+  --surface-elevated: rgba(255, 255, 255, 0.88);
+  --text: #23344b;
+  --text-dark: #102a46;
+  --text-muted: #788493;
+  --border: #e8e5dc;
+  --border-soft: #eef0f2;
+  --border-input: #dfe4ea;
+  --input-bg: #ffffff;
+  --input-text: #26364a;
+  --hover-bg: #f3f6fa;
+  --shadow: rgba(24, 43, 66, 0.045);
+  --shadow-lg: rgba(24, 43, 66, 0.06);
+}
+
+[data-theme='dark'] {
+  /* Dark theme surface tokens */
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --surface-elevated: rgba(30, 41, 59, 0.82);
+  --text: #e2e8f0;
+  --text-dark: #f8fafc;
+  --text-muted: #94a3b8;
+  --border: #334155;
+  --border-soft: #475569;
+  --border-input: #475569;
+  --input-bg: #1e293b;
+  --input-text: #f1f5f9;
+  --hover-bg: rgba(255, 255, 255, 0.06);
+  --shadow: rgba(0, 0, 0, 0.45);
+  --shadow-lg: rgba(0, 0, 0, 0.55);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  *,
+  *::before,
+  *::after {
+    transition: background-color 220ms ease, border-color 220ms ease, color 220ms ease;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button,
+a,
+input {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 3px solid rgba(201, 154, 58, 0.65);
+  outline-offset: 3px;
+}
+
+::selection {
+  color: var(--navy-dark);
+  background: rgba(201, 154, 58, 0.3);
+}
